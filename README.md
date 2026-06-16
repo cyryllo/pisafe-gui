@@ -11,7 +11,7 @@ Graficzny interfejs (PyQt5) dla narzędzia [pisafe](https://github.com/RichardMi
 
 ## 📸 Podgląd
 
-![Interfejs PiSafe GUI](docs/screenshot.png)
+![Interfejs PiSafe GUI](doc/screenshot.png)
 
 ---
 
