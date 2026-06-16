@@ -71,7 +71,6 @@ pisafe-gui/
 ├── pisafe_gui.py          # Główna aplikacja PyQt5
 ├── requirements.txt       # Zależności Pythona
 ├── install.sh             # Skrypt instalacyjny
-├── pisafe-gui.desktop     # Skrót w menu aplikacji
 └── README.md
 ```
 
