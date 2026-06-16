@@ -89,7 +89,6 @@ pisafe-gui/
 - [ ] Historia ostatnich operacji
 - [ ] Powiadomienie systemowe po zakończeniu zadania
 - [ ] Obsługa wielu dysków jednocześnie
-- [ ] Tryb CLI (bez GUI)
 
 ---
 
