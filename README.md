@@ -90,7 +90,6 @@ pisafe-gui/
 - [ ] History of recent operations
 - [ ] System notification when a task finishes
 - [ ] Support for multiple disks at once
-- [ ] CLI mode (no GUI)
 
 ---
 
