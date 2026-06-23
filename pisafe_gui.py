@@ -159,6 +159,10 @@ QLabel#lbl_subtitle {
     color: #6c7086;
     font-size: 11px;
 }
+QLabel#lbl_version {
+    color: #45475a;
+    font-size: 10px;
+}
 """
 
 class WorkerThread(QThread):
@@ -200,7 +204,7 @@ class WorkerThread(QThread):
 class PiSafeGUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(f"{tr('window_title')} v{APP_VERSION}")
+        self.setWindowTitle(tr("window_title"))
         self.setMinimumSize(820, 640)
         self.worker = None
         self._build_ui()
@@ -217,7 +221,7 @@ class PiSafeGUI(QMainWindow):
         ico = QLabel("🫐")
         ico.setFont(QFont("Segoe UI Emoji", 26))
         title_col = QVBoxLayout()
-        lbl_t = QLabel(f"{tr('window_title')}  v{APP_VERSION}")
+        lbl_t = QLabel(tr("window_title"))
         lbl_t.setObjectName("lbl_title")
         lbl_s = QLabel(tr("subtitle"))
         lbl_s.setObjectName("lbl_subtitle")
@@ -236,9 +240,6 @@ class PiSafeGUI(QMainWindow):
             self.lang_combo.setCurrentIndex(idx)
         self.lang_combo.currentIndexChanged.connect(self.change_language)
         hdr.addWidget(self.lang_combo)
-        btn_refresh = QPushButton(tr("btn_refresh_disks"))
-        btn_refresh.clicked.connect(self.refresh_disks)
-        hdr.addWidget(btn_refresh)
         root.addLayout(hdr)
 
         sep = QFrame()
@@ -275,6 +276,10 @@ class PiSafeGUI(QMainWindow):
         log_lay.addWidget(btn_clear)
         root.addWidget(grp_log)
 
+        lbl_version = QLabel(f"v{APP_VERSION}")
+        lbl_version.setObjectName("lbl_version")
+        root.addWidget(lbl_version, 0, Qt.AlignRight)
+
     def _tab_flash(self):
         w = QWidget()
         lay = QVBoxLayout(w)
@@ -299,6 +304,9 @@ class PiSafeGUI(QMainWindow):
         self.flash_disk_combo.setMinimumWidth(300)
         row2.addWidget(QLabel(tr("label_disk")))
         row2.addWidget(self.flash_disk_combo, 1)
+        btn_refresh1 = QPushButton(tr("btn_refresh_disks"))
+        btn_refresh1.clicked.connect(self.refresh_disks)
+        row2.addWidget(btn_refresh1)
         gl2.addLayout(row2)
         lbl_warn = QLabel(tr("flash_warning"))
         lbl_warn.setStyleSheet("color: #f38ba8; font-weight: bold;")
@@ -324,6 +332,9 @@ class PiSafeGUI(QMainWindow):
         self.backup_disk_combo.setMinimumWidth(300)
         row.addWidget(QLabel(tr("label_disk")))
         row.addWidget(self.backup_disk_combo, 1)
+        btn_refresh2 = QPushButton(tr("btn_refresh_disks"))
+        btn_refresh2.clicked.connect(self.refresh_disks)
+        row.addWidget(btn_refresh2)
         gl.addLayout(row)
         lay.addWidget(grp)
 
