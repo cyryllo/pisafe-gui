@@ -27,6 +27,18 @@ from translations import (
 
 set_language(get_saved_language() or DEFAULT_LANGUAGE)
 
+
+def _read_version():
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "VERSION")
+    try:
+        with open(path, encoding="utf-8") as f:
+            return f.read().strip()
+    except OSError:
+        return "?"
+
+
+APP_VERSION = _read_version()
+
 DARK_STYLE = """
 QMainWindow, QWidget {
     background-color: #1e1e2e;
@@ -188,7 +200,7 @@ class WorkerThread(QThread):
 class PiSafeGUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle(tr("window_title"))
+        self.setWindowTitle(f"{tr('window_title')} v{APP_VERSION}")
         self.setMinimumSize(820, 640)
         self.worker = None
         self._build_ui()
@@ -205,7 +217,7 @@ class PiSafeGUI(QMainWindow):
         ico = QLabel("🫐")
         ico.setFont(QFont("Segoe UI Emoji", 26))
         title_col = QVBoxLayout()
-        lbl_t = QLabel(tr("window_title"))
+        lbl_t = QLabel(f"{tr('window_title')}  v{APP_VERSION}")
         lbl_t.setObjectName("lbl_title")
         lbl_s = QLabel(tr("subtitle"))
         lbl_s.setObjectName("lbl_subtitle")

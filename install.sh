@@ -1,6 +1,31 @@
 #!/bin/bash
 set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INSTALL_DIR="$HOME/.local/share/pisafe-gui"
+NEW_VERSION="$(cat "$SCRIPT_DIR/VERSION" 2>/dev/null || echo "?")"
+
+if [ -f "$INSTALL_DIR/VERSION" ]; then
+    CURRENT_VERSION="$(cat "$INSTALL_DIR/VERSION")"
+    if [ "$CURRENT_VERSION" = "$NEW_VERSION" ]; then
+        echo "==> PiSafe GUI w wersji $CURRENT_VERSION jest już zainstalowane."
+        read -r -p "Zainstalować ponownie? [t/N] " ODP
+        case "$ODP" in
+            [tTyY]*) ;;
+            *) echo "Instalacja przerwana."; exit 0 ;;
+        esac
+    else
+        echo "==> Wykryto zainstalowaną wersję: $CURRENT_VERSION"
+        echo "==> Dostępna wersja: $NEW_VERSION"
+        read -r -p "Zainstalować/zaktualizować? [T/n] " ODP
+        case "$ODP" in
+            [nN]*) echo "Instalacja przerwana."; exit 0 ;;
+            *) ;;
+        esac
+    fi
+else
+    echo "==> Instalacja PiSafe GUI $NEW_VERSION"
+fi
+
 echo "==> Instalacja zależności systemowych..."
 sudo apt-get update -q
 sudo apt-get install -y python3-pyqt5 pv
@@ -14,9 +39,8 @@ else
     echo "==> pisafe już zainstalowane."
 fi
 
-INSTALL_DIR="$HOME/.local/share/pisafe-gui"
 mkdir -p "$INSTALL_DIR"
-cp pisafe_gui.py translations.py "$INSTALL_DIR/"
+cp "$SCRIPT_DIR/pisafe_gui.py" "$SCRIPT_DIR/translations.py" "$SCRIPT_DIR/VERSION" "$INSTALL_DIR/"
 mkdir -p "$HOME/.local/share/applications"
 cat > "$HOME/.local/share/applications/pisafe-gui.desktop" << DESKTOP
 [Desktop Entry]
@@ -30,4 +54,4 @@ Categories=Utility;System;
 DESKTOP
 
 echo ""
-echo "✅ Gotowe! Uruchom: python3 pisafe_gui.py"
+echo "✅ Gotowe! Zainstalowano PiSafe GUI $NEW_VERSION. Uruchom: python3 pisafe_gui.py"
