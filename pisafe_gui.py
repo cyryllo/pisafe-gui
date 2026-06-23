@@ -406,6 +406,8 @@ class PiSafeGUI(QMainWindow):
             self.log_line(tr("warn_system_disks", error=e) + "\n", "#f9e2af")
         return system_devs
 
+    REMOVABLE_TRANSPORTS = {"usb", "mmc"}
+
     def _get_disks(self):
         try:
             system_disks = self._get_system_disks()
@@ -415,6 +417,7 @@ class PiSafeGUI(QMainWindow):
             data = json.loads(out)
             result = []
             skipped = []
+            skipped_other = []
             for dev in data.get("blockdevices", []):
                 name = dev.get("name", "")
                 size = dev.get("size", "")
@@ -423,10 +426,15 @@ class PiSafeGUI(QMainWindow):
                 if name in system_disks:
                     skipped.append(f"/dev/{name}")
                     continue
+                if tran.lower() not in self.REMOVABLE_TRANSPORTS:
+                    skipped_other.append(f"/dev/{name}")
+                    continue
                 label = f"/dev/{name}  [{size}]  {model.strip()}  {tran.upper()}"
                 result.append(label)
             if skipped:
                 self.log_line(tr("hidden_system_disks", disks=", ".join(skipped)) + "\n", "#f9e2af")
+            if skipped_other:
+                self.log_line(tr("hidden_non_removable_disks", disks=", ".join(skipped_other)) + "\n", "#f9e2af")
             return result if result else [tr("no_disks_available")]
         except Exception as e:
             return [tr("lsblk_error", error=e)]

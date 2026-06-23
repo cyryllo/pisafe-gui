@@ -52,6 +52,7 @@ TRANSLATIONS = {
 
         "warn_system_disks": "Warning: could not check system disks: {error}",
         "hidden_system_disks": "Hidden system disks: {disks}",
+        "hidden_non_removable_disks": "Hidden non-USB/SD disks: {disks}",
         "no_disks_available": "(no disks available)",
         "lsblk_error": "lsblk error: {error}",
         "disks_refreshed": "Disk list refreshed.\n",
@@ -127,6 +128,7 @@ TRANSLATIONS = {
 
         "warn_system_disks": "Ostrzeżenie: nie można sprawdzić dysków systemowych: {error}",
         "hidden_system_disks": "Ukryto dyski systemowe: {disks}",
+        "hidden_non_removable_disks": "Ukryto dyski niebędące USB/SD: {disks}",
         "no_disks_available": "(brak dostępnych dysków)",
         "lsblk_error": "Błąd lsblk: {error}",
         "disks_refreshed": "Odświeżono listę dysków.\n",
