@@ -26,6 +26,17 @@ Graficzny interfejs (PyQt5) dla narzędzia [pisafe](https://github.com/RichardMi
 
 ---
 
+## 🌐 Języki
+
+Interfejs jest dostępny w wersjach:
+
+- 🇬🇧 angielski (domyślny)
+- 🇵🇱 polski
+
+Język można zmienić z listy rozwijanej w nagłówku aplikacji — po zmianie aplikacja uruchamia się ponownie, aby zastosować nowy język. Tłumaczenia znajdują się w pliku [`translations.py`](translations.py) jako proste słowniki klucz → tekst, więc dodanie nowego języka nie wymaga zmian w kodzie interfejsu. Chcesz dodać swój język? Zobacz sekcję [Wsparcie i wkład](#-wsparcie-i-wkład) poniżej.
+
+---
+
 ## 🖥️ Wymagania
 
 - Linux / Raspberry Pi OS
@@ -95,6 +106,8 @@ pisafe-gui/
 ## 🤝 Wsparcie i wkład
 
 Pull requesty i zgłoszenia (issues) są mile widziane! Jeśli znajdziesz błąd lub masz propozycję funkcji, otwórz issue w tym repozytorium.
+
+**Dodawanie tłumaczenia:** otwórz plik [`translations.py`](translations.py), dodaj kod i nazwę swojego języka do `LANGUAGES`, a następnie skopiuj słownik `"en"` pod nowym kluczem i przetłumacz wartości (zachowując `{placeholdery}` bez zmian). To wszystko — żadne inne zmiany w kodzie nie są potrzebne. PR-y z nowymi językami są bardzo mile widziane!
 
 ---
 

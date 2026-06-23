@@ -26,6 +26,17 @@ A graphical interface (PyQt5) for the [pisafe](https://github.com/RichardMidnigh
 
 ---
 
+## 🌐 Languages
+
+The interface is available in:
+
+- 🇬🇧 English (default)
+- 🇵🇱 Polski
+
+Switch language from the dropdown in the app's header — the app restarts to apply the change. Translations live in [`translations.py`](translations.py) as plain key → text dictionaries, so adding a new language doesn't require touching any UI code. Want to add yours? See [Contributing](#-contributing) below.
+
+---
+
 ## 🖥️ Requirements
 
 - Linux / Raspberry Pi OS
@@ -96,6 +107,8 @@ pisafe-gui/
 ## 🤝 Contributing
 
 Pull requests and issues are welcome! If you find a bug or have a feature idea, please open an issue in this repository.
+
+**Adding a translation:** open [`translations.py`](translations.py), add your language code and name to `LANGUAGES`, then copy the `"en"` dictionary under a new key and translate the values (keep the `{placeholders}` as they are). That's it — no other code changes needed. PRs for new languages are very welcome!
 
 ---
 
