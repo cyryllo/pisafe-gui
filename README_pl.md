@@ -87,15 +87,8 @@ pisafe-gui/
 
 ---
 
-## ⚠️ Znane ograniczenia
-
-- Pasek postępu nie pokazuje rzeczywistego procentu w czasie rzeczywistym — zależy to od tego, czy `pisafe`/`dd` wypisuje dane progresu w stdout. Obecnie pasek skacze z 0% na 100% po zakończeniu operacji.
-
----
-
 ## 🗺️ Planowane funkcje (TODO)
 
-- [ ] Rzeczywisty pasek postępu (np. przez `pv` lub monitorowanie rozmiaru pliku)
 - [ ] Weryfikacja sumy kontrolnej obrazu (MD5/SHA256)
 - [ ] Historia ostatnich operacji
 - [ ] Powiadomienie systemowe po zakończeniu zadania

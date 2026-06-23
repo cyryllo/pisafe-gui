@@ -88,15 +88,8 @@ pisafe-gui/
 
 ---
 
-## ⚠️ Known limitations
-
-- The progress bar doesn't show a real-time percentage — this depends on whether `pisafe`/`dd` outputs progress data to stdout. Currently the bar jumps from 0% to 100% once the operation finishes.
-
----
-
 ## 🗺️ Planned features (TODO)
 
-- [ ] Real progress bar (e.g. via `pv` or by monitoring output file size)
 - [ ] Image checksum verification (MD5/SHA256)
 - [ ] History of recent operations
 - [ ] System notification when a task finishes

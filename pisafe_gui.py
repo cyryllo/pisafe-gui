@@ -7,6 +7,7 @@ Wymagane narzędzie: pisafe (zainstalowane w /usr/local/bin/pisafe)
 
 import sys
 import os
+import pty
 import subprocess
 import json
 from datetime import datetime
@@ -176,26 +177,61 @@ class WorkerThread(QThread):
         self.cmd = cmd
         self.proc = None
 
+    def _handle_chunk(self, text):
+        if not text:
+            return
+        self.output.emit(text + "\n")
+        if "%" in text:
+            for tok in text.split():
+                tok = tok.strip("%")
+                if tok.isdigit():
+                    self.progress.emit(int(tok))
+                    break
+
     def run(self):
+        # Tools like `pv` only print progress if their stderr looks like a
+        # real terminal, so the child runs attached to a pty instead of a
+        # plain pipe.
         self.output.emit(f"$ {' '.join(self.cmd)}\n")
+        master_fd, slave_fd = -1, -1
         try:
+            master_fd, slave_fd = pty.openpty()
             self.proc = subprocess.Popen(
-                self.cmd, stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT, text=True, bufsize=1
+                self.cmd, stdout=slave_fd, stderr=slave_fd, close_fds=True
             )
-            for line in self.proc.stdout:
-                self.output.emit(line)
-                if "%" in line:
-                    for tok in line.split():
-                        tok = tok.strip("%")
-                        if tok.isdigit():
-                            self.progress.emit(int(tok))
-                            break
+            os.close(slave_fd)
+            slave_fd = -1
+
+            buf = ""
+            while True:
+                try:
+                    chunk = os.read(master_fd, 4096)
+                except OSError:
+                    break
+                if not chunk:
+                    break
+                buf += chunk.decode("utf-8", errors="replace")
+                while True:
+                    idx_candidates = [i for i in (buf.find("\n"), buf.find("\r")) if i != -1]
+                    if not idx_candidates:
+                        break
+                    idx = min(idx_candidates)
+                    piece, buf = buf[:idx], buf[idx + 1:]
+                    self._handle_chunk(piece)
+            self._handle_chunk(buf)
+
             self.proc.wait()
             ok = self.proc.returncode == 0
             self.finished.emit(ok, tr("worker_success") if ok else tr("worker_error", code=self.proc.returncode))
         except Exception as e:
             self.finished.emit(False, str(e))
+        finally:
+            for fd in (master_fd, slave_fd):
+                if fd != -1:
+                    try:
+                        os.close(fd)
+                    except OSError:
+                        pass
 
     def stop(self):
         if self.proc:
