@@ -100,6 +100,7 @@ pisafe-gui/
 - [ ] Historia ostatnich operacji
 - [ ] Powiadomienie systemowe po zakończeniu zadania
 - [ ] Obsługa wielu dysków jednocześnie
+- [ ] Zarządzanie wersjami obrazów — przeglądanie wskazanego folderu z obrazami i tagowanie/wersjonowanie backupów (np. v1, v2, "stable"), żeby łatwo odróżnić starsze obrazy od najnowszych
 
 ---
 
