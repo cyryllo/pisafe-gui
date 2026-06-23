@@ -60,4 +60,6 @@ Categories=Utility;System;
 DESKTOP
 
 echo ""
-echo "✅ Gotowe! Zainstalowano PiSafe GUI $NEW_VERSION. Uruchom: python3 pisafe_gui.py"
+echo "✅ Gotowe! Zainstalowano PiSafe GUI $NEW_VERSION."
+echo "   Znajdziesz ją w menu aplikacji (System > PiSafe GUI) — sprawdź tam."
+echo "   Można ją też uruchomić z terminala: python3 $INSTALL_DIR/pisafe_gui.py"
