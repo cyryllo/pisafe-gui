@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo "==> Instalacja zależności systemowych..."
 sudo apt-get update -q
 sudo apt-get install -y python3-pyqt5 pv
@@ -7,8 +8,8 @@ sudo apt-get install -y python3-pyqt5 pv
 echo "==> Sprawdzanie pisafe..."
 if ! command -v pisafe &> /dev/null; then
     echo "==> Pobieranie i instalacja pisafe..."
-    wget -q https://raw.githubusercontent.com/RichardMidnight/pi-safe/main/pisafe -O /tmp/pisafe
-    bash /tmp/pisafe install
+    wget -q https://raw.githubusercontent.com/RichardMidnight/pi-safe/main/pisafe -O "$SCRIPT_DIR/pisafe"
+    bash "$SCRIPT_DIR/pisafe" install
 else
     echo "==> pisafe już zainstalowane."
 fi
