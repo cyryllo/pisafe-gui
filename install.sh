@@ -15,7 +15,7 @@ fi
 
 INSTALL_DIR="$HOME/.local/share/pisafe-gui"
 mkdir -p "$INSTALL_DIR"
-cp pisafe_gui.py "$INSTALL_DIR/"
+cp pisafe_gui.py translations.py "$INSTALL_DIR/"
 mkdir -p "$HOME/.local/share/applications"
 cat > "$HOME/.local/share/applications/pisafe-gui.desktop" << DESKTOP
 [Desktop Entry]
