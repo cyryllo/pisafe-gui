@@ -20,6 +20,13 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
 from PyQt5.QtGui import QFont, QColor, QPalette, QIcon, QTextCursor
 
+from translations import (
+    LANGUAGES, DEFAULT_LANGUAGE, tr, set_language, get_language,
+    get_saved_language, save_language,
+)
+
+set_language(get_saved_language() or DEFAULT_LANGUAGE)
+
 DARK_STYLE = """
 QMainWindow, QWidget {
     background-color: #1e1e2e;
@@ -169,7 +176,7 @@ class WorkerThread(QThread):
                             break
             self.proc.wait()
             ok = self.proc.returncode == 0
-            self.finished.emit(ok, "Zakończono pomyślnie." if ok else f"Błąd (kod {self.proc.returncode}).")
+            self.finished.emit(ok, tr("worker_success") if ok else tr("worker_error", code=self.proc.returncode))
         except Exception as e:
             self.finished.emit(False, str(e))
 
@@ -181,7 +188,7 @@ class WorkerThread(QThread):
 class PiSafeGUI(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("PiSafe GUI")
+        self.setWindowTitle(tr("window_title"))
         self.setMinimumSize(820, 640)
         self.worker = None
         self._build_ui()
@@ -198,9 +205,9 @@ class PiSafeGUI(QMainWindow):
         ico = QLabel("🫐")
         ico.setFont(QFont("Segoe UI Emoji", 26))
         title_col = QVBoxLayout()
-        lbl_t = QLabel("PiSafe GUI")
+        lbl_t = QLabel(tr("window_title"))
         lbl_t.setObjectName("lbl_title")
-        lbl_s = QLabel("Graficzny interfejs dla narzędzia pisafe")
+        lbl_s = QLabel(tr("subtitle"))
         lbl_s.setObjectName("lbl_subtitle")
         title_col.addWidget(lbl_t)
         title_col.addWidget(lbl_s)
@@ -208,7 +215,16 @@ class PiSafeGUI(QMainWindow):
         hdr.addSpacing(8)
         hdr.addLayout(title_col)
         hdr.addStretch()
-        btn_refresh = QPushButton("⟳  Odśwież dyski")
+        hdr.addWidget(QLabel(tr("language_label")))
+        self.lang_combo = QComboBox()
+        for code, name in LANGUAGES.items():
+            self.lang_combo.addItem(name, code)
+        idx = self.lang_combo.findData(get_language())
+        if idx >= 0:
+            self.lang_combo.setCurrentIndex(idx)
+        self.lang_combo.currentIndexChanged.connect(self.change_language)
+        hdr.addWidget(self.lang_combo)
+        btn_refresh = QPushButton(tr("btn_refresh_disks"))
         btn_refresh.clicked.connect(self.refresh_disks)
         hdr.addWidget(btn_refresh)
         root.addLayout(hdr)
@@ -219,12 +235,12 @@ class PiSafeGUI(QMainWindow):
         root.addWidget(sep)
 
         tabs = QTabWidget()
-        tabs.addTab(self._tab_flash(), "⚡  Flash obrazu → SD")
-        tabs.addTab(self._tab_backup(), "💾  Backup SD → obraz")
-        tabs.addTab(self._tab_list(), "📋  Lista dysków")
+        tabs.addTab(self._tab_flash(), tr("tab_flash"))
+        tabs.addTab(self._tab_backup(), tr("tab_backup"))
+        tabs.addTab(self._tab_list(), tr("tab_list"))
         root.addWidget(tabs, 1)
 
-        grp_log = QGroupBox("Logi")
+        grp_log = QGroupBox(tr("grp_logs"))
         log_lay = QVBoxLayout(grp_log)
         self.log = QTextEdit()
         self.log.setReadOnly(True)
@@ -234,7 +250,7 @@ class PiSafeGUI(QMainWindow):
         bar_row = QHBoxLayout()
         self.progress = QProgressBar()
         self.progress.setValue(0)
-        self.btn_stop = QPushButton("■  Zatrzymaj")
+        self.btn_stop = QPushButton(tr("btn_stop"))
         self.btn_stop.setObjectName("btn_stop")
         self.btn_stop.setEnabled(False)
         self.btn_stop.clicked.connect(self.stop_task)
@@ -242,7 +258,7 @@ class PiSafeGUI(QMainWindow):
         bar_row.addWidget(self.btn_stop)
         log_lay.addLayout(bar_row)
 
-        btn_clear = QPushButton("Wyczyść logi")
+        btn_clear = QPushButton(tr("btn_clear_logs"))
         btn_clear.clicked.connect(self.log.clear)
         log_lay.addWidget(btn_clear)
         root.addWidget(grp_log)
@@ -252,33 +268,33 @@ class PiSafeGUI(QMainWindow):
         lay = QVBoxLayout(w)
         lay.setSpacing(12)
 
-        grp = QGroupBox("Plik obrazu (.img / .zip / .xz / .gz / .zst)")
+        grp = QGroupBox(tr("grp_flash_image"))
         gl = QVBoxLayout(grp)
         row = QHBoxLayout()
         self.flash_img_path = QLineEdit()
-        self.flash_img_path.setPlaceholderText("Wybierz lub wpisz ścieżkę do pliku obrazu…")
-        btn_browse = QPushButton("📂  Przeglądaj")
+        self.flash_img_path.setPlaceholderText(tr("flash_img_placeholder"))
+        btn_browse = QPushButton(tr("btn_browse"))
         btn_browse.clicked.connect(self.browse_image)
         row.addWidget(self.flash_img_path, 1)
         row.addWidget(btn_browse)
         gl.addLayout(row)
         lay.addWidget(grp)
 
-        grp2 = QGroupBox("Dysk docelowy (SD / USB)")
+        grp2 = QGroupBox(tr("grp_flash_target"))
         gl2 = QVBoxLayout(grp2)
         row2 = QHBoxLayout()
         self.flash_disk_combo = QComboBox()
         self.flash_disk_combo.setMinimumWidth(300)
-        row2.addWidget(QLabel("Dysk:"))
+        row2.addWidget(QLabel(tr("label_disk")))
         row2.addWidget(self.flash_disk_combo, 1)
         gl2.addLayout(row2)
-        lbl_warn = QLabel("⚠️  Uwaga: zawartość wybranego dysku zostanie TRWALE nadpisana!")
+        lbl_warn = QLabel(tr("flash_warning"))
         lbl_warn.setStyleSheet("color: #f38ba8; font-weight: bold;")
         gl2.addWidget(lbl_warn)
         lay.addWidget(grp2)
 
         lay.addStretch()
-        self.btn_flash = QPushButton("⚡  Flash obrazu na dysk")
+        self.btn_flash = QPushButton(tr("btn_flash"))
         self.btn_flash.setObjectName("btn_flash")
         self.btn_flash.clicked.connect(self.do_flash)
         lay.addWidget(self.btn_flash, 0, Qt.AlignRight)
@@ -289,44 +305,44 @@ class PiSafeGUI(QMainWindow):
         lay = QVBoxLayout(w)
         lay.setSpacing(12)
 
-        grp = QGroupBox("Dysk źródłowy (SD do backupu)")
+        grp = QGroupBox(tr("grp_backup_source"))
         gl = QVBoxLayout(grp)
         row = QHBoxLayout()
         self.backup_disk_combo = QComboBox()
         self.backup_disk_combo.setMinimumWidth(300)
-        row.addWidget(QLabel("Dysk:"))
+        row.addWidget(QLabel(tr("label_disk")))
         row.addWidget(self.backup_disk_combo, 1)
         gl.addLayout(row)
         lay.addWidget(grp)
 
-        grp2 = QGroupBox("Plik wyjściowy obrazu")
+        grp2 = QGroupBox(tr("grp_backup_output"))
         gl2 = QVBoxLayout(grp2)
         row_dir = QHBoxLayout()
         self.backup_dir = QLineEdit(os.path.expanduser("~"))
-        btn_dir = QPushButton("📂  Folder")
+        btn_dir = QPushButton(tr("btn_dir"))
         btn_dir.clicked.connect(self.browse_out_dir)
-        row_dir.addWidget(QLabel("Katalog:"))
+        row_dir.addWidget(QLabel(tr("label_dir")))
         row_dir.addWidget(self.backup_dir, 1)
         row_dir.addWidget(btn_dir)
         gl2.addLayout(row_dir)
 
         row_name = QHBoxLayout()
         self.backup_name = QLineEdit(f"backup_{datetime.now().strftime('%Y%m%d_%H%M')}")
-        row_name.addWidget(QLabel("Nazwa pliku:"))
+        row_name.addWidget(QLabel(tr("label_filename")))
         row_name.addWidget(self.backup_name, 1)
         gl2.addLayout(row_name)
 
         row_fmt = QHBoxLayout()
         self.backup_fmt = QComboBox()
         self.backup_fmt.addItems([".img", ".zip", ".gz", ".xz", ".zst"])
-        row_fmt.addWidget(QLabel("Kompresja:"))
+        row_fmt.addWidget(QLabel(tr("label_compression")))
         row_fmt.addWidget(self.backup_fmt)
         row_fmt.addStretch()
         gl2.addLayout(row_fmt)
         lay.addWidget(grp2)
 
         lay.addStretch()
-        self.btn_backup = QPushButton("💾  Utwórz obraz dysku")
+        self.btn_backup = QPushButton(tr("btn_backup"))
         self.btn_backup.setObjectName("btn_backup")
         self.btn_backup.clicked.connect(self.do_backup)
         lay.addWidget(self.btn_backup, 0, Qt.AlignRight)
@@ -338,22 +354,29 @@ class PiSafeGUI(QMainWindow):
         self.list_output = QTextEdit()
         self.list_output.setReadOnly(True)
         lay.addWidget(self.list_output)
-        btn = QPushButton("🔄  Odśwież listę dysków")
+        btn = QPushButton(tr("btn_refresh_list"))
         btn.clicked.connect(self.show_disk_list)
         lay.addWidget(btn)
         QTimer.singleShot(500, self.show_disk_list)
         return w
 
+    def change_language(self, index):
+        code = self.lang_combo.itemData(index)
+        if code and code != get_language():
+            save_language(code)
+            QMessageBox.information(self, tr("restart_required_title"), tr("restart_required_text"))
+            os.execv(sys.executable, [sys.executable] + sys.argv)
+
     def browse_image(self):
         path, _ = QFileDialog.getOpenFileName(
-            self, "Wybierz obraz", os.path.expanduser("~"),
-            "Obrazy (*.img *.zip *.xz *.gz *.zst);;Wszystkie (*)"
+            self, tr("dlg_choose_image_title"), os.path.expanduser("~"),
+            tr("dlg_choose_image_filter")
         )
         if path:
             self.flash_img_path.setText(path)
 
     def browse_out_dir(self):
-        d = QFileDialog.getExistingDirectory(self, "Wybierz katalog docelowy", self.backup_dir.text())
+        d = QFileDialog.getExistingDirectory(self, tr("dlg_choose_dir_title"), self.backup_dir.text())
         if d:
             self.backup_dir.setText(d)
 
@@ -380,7 +403,7 @@ class PiSafeGUI(QMainWindow):
             for dev in data.get("blockdevices", []):
                 check_device(dev)
         except Exception as e:
-            self.log_line(f"Ostrzeżenie: nie można sprawdzić dysków systemowych: {e}\n", "#f9e2af")
+            self.log_line(tr("warn_system_disks", error=e) + "\n", "#f9e2af")
         return system_devs
 
     def _get_disks(self):
@@ -403,17 +426,17 @@ class PiSafeGUI(QMainWindow):
                 label = f"/dev/{name}  [{size}]  {model.strip()}  {tran.upper()}"
                 result.append(label)
             if skipped:
-                self.log_line(f"Ukryto dyski systemowe: {', '.join(skipped)}\n", "#f9e2af")
-            return result if result else ["(brak dostępnych dysków)"]
+                self.log_line(tr("hidden_system_disks", disks=", ".join(skipped)) + "\n", "#f9e2af")
+            return result if result else [tr("no_disks_available")]
         except Exception as e:
-            return [f"Błąd lsblk: {e}"]
+            return [tr("lsblk_error", error=e)]
 
     def refresh_disks(self):
         disks = self._get_disks()
         for combo in (self.flash_disk_combo, self.backup_disk_combo):
             combo.clear()
             combo.addItems(disks)
-        self.log_line("Odświeżono listę dysków.\n")
+        self.log_line(tr("disks_refreshed"))
 
     def _dev_from_combo(self, combo):
         txt = combo.currentText().strip()
@@ -429,21 +452,20 @@ class PiSafeGUI(QMainWindow):
             )
             self.list_output.setPlainText(out)
         except Exception as e:
-            self.list_output.setPlainText(f"Błąd: {e}")
+            self.list_output.setPlainText(tr("list_error", error=e))
 
     def do_flash(self):
         img = self.flash_img_path.text().strip()
         dev = self._dev_from_combo(self.flash_disk_combo)
         if not img or not os.path.isfile(img):
-            QMessageBox.warning(self, "Błąd", "Podaj prawidłową ścieżkę do pliku obrazu.")
+            QMessageBox.warning(self, tr("error_title"), tr("error_invalid_image_path"))
             return
         if not dev:
-            QMessageBox.warning(self, "Błąd", "Wybierz dysk docelowy.")
+            QMessageBox.warning(self, tr("error_title"), tr("error_select_target_disk"))
             return
         ret = QMessageBox.warning(
-            self, "Potwierdź operację",
-            f"UWAGA! Wszystkie dane na {dev} zostaną TRWALE usunięte!\n\n"
-            f"Obraz: {img}\nDysk: {dev}\n\nCzy na pewno chcesz kontynuować?",
+            self, tr("confirm_flash_title"),
+            tr("confirm_flash_text", dev=dev, img=img),
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
         if ret != QMessageBox.Yes:
@@ -456,15 +478,15 @@ class PiSafeGUI(QMainWindow):
         name = self.backup_name.text().strip()
         fmt = self.backup_fmt.currentText()
         if not dev:
-            QMessageBox.warning(self, "Błąd", "Wybierz dysk źródłowy.")
+            QMessageBox.warning(self, tr("error_title"), tr("error_select_source_disk"))
             return
         if not name:
-            QMessageBox.warning(self, "Błąd", "Podaj nazwę pliku wyjściowego.")
+            QMessageBox.warning(self, tr("error_title"), tr("error_filename_required"))
             return
         out_path = os.path.join(out_dir, name + fmt)
         ret = QMessageBox.question(
-            self, "Potwierdź backup",
-            f"Tworzenie obrazu:\n  Dysk: {dev}\n  Plik: {out_path}\n\nKontynuować?",
+            self, tr("confirm_backup_title"),
+            tr("confirm_backup_text", dev=dev, out_path=out_path),
             QMessageBox.Yes | QMessageBox.No
         )
         if ret != QMessageBox.Yes:
@@ -473,7 +495,7 @@ class PiSafeGUI(QMainWindow):
 
     def _run(self, cmd):
         if self.worker and self.worker.isRunning():
-            QMessageBox.warning(self, "Zajęty", "Trwa inne zadanie. Poczekaj lub je zatrzymaj.")
+            QMessageBox.warning(self, tr("busy_title"), tr("busy_text"))
             return
         self.progress.setValue(0)
         self.btn_stop.setEnabled(True)
@@ -488,7 +510,7 @@ class PiSafeGUI(QMainWindow):
     def stop_task(self):
         if self.worker:
             self.worker.stop()
-            self.log_line("\n⛔ Zadanie przerwane przez użytkownika.\n")
+            self.log_line(tr("task_stopped"))
 
     def on_finished(self, ok, msg):
         self.btn_stop.setEnabled(False)
@@ -515,13 +537,8 @@ def main():
     if subprocess.run(["which", "pisafe"], capture_output=True).returncode != 0:
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Warning)
-        msg.setWindowTitle("pisafe nie znalezione")
-        msg.setText(
-            "Narzędzie 'pisafe' nie jest zainstalowane.\n\n"
-            "Zainstaluj je poleceniem:\n"
-            "wget https://raw.githubusercontent.com/RichardMidnight/pi-safe/main/pisafe -O pisafe\n"
-            "bash pisafe install"
-        )
+        msg.setWindowTitle(tr("pisafe_missing_title"))
+        msg.setText(tr("pisafe_missing_text"))
         msg.exec_()
     win = PiSafeGUI()
     win.show()
