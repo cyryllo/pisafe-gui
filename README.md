@@ -92,7 +92,6 @@ pisafe-gui/
 
 - [ ] Image checksum verification (MD5/SHA256)
 - [ ] History of recent operations
-- [ ] System notification when a task finishes
 - [ ] Support for multiple disks at once
 - [ ] Image version management — browse a chosen folder of created images and tag/version each backup (e.g. v1, v2, "stable"), so it's easy to tell older and newest images apart
 
