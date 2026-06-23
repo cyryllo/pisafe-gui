@@ -28,7 +28,7 @@ TRANSLATIONS = {
         "btn_stop": "■  Stop",
         "btn_clear_logs": "Clear logs",
 
-        "grp_flash_image": "Image file (.img / .zip / .xz / .gz / .zst)",
+        "grp_flash_image": "Image file (.img / .iso / .zip / .xz / .gz / .zst)",
         "flash_img_placeholder": "Select or type the path to the image file…",
         "btn_browse": "📂  Browse",
         "grp_flash_target": "Target disk (SD / USB)",
@@ -47,7 +47,7 @@ TRANSLATIONS = {
         "btn_refresh_list": "🔄  Refresh disk list",
 
         "dlg_choose_image_title": "Choose image",
-        "dlg_choose_image_filter": "Images (*.img *.zip *.xz *.gz *.zst);;All files (*)",
+        "dlg_choose_image_filter": "Images (*.img *.iso *.zip *.xz *.gz *.zst);;All files (*)",
         "dlg_choose_dir_title": "Choose target directory",
 
         "warn_system_disks": "Warning: could not check system disks: {error}",
@@ -104,7 +104,7 @@ TRANSLATIONS = {
         "btn_stop": "■  Zatrzymaj",
         "btn_clear_logs": "Wyczyść logi",
 
-        "grp_flash_image": "Plik obrazu (.img / .zip / .xz / .gz / .zst)",
+        "grp_flash_image": "Plik obrazu (.img / .iso / .zip / .xz / .gz / .zst)",
         "flash_img_placeholder": "Wybierz lub wpisz ścieżkę do pliku obrazu…",
         "btn_browse": "📂  Przeglądaj",
         "grp_flash_target": "Dysk docelowy (SD / USB)",
@@ -123,7 +123,7 @@ TRANSLATIONS = {
         "btn_refresh_list": "🔄  Odśwież listę dysków",
 
         "dlg_choose_image_title": "Wybierz obraz",
-        "dlg_choose_image_filter": "Obrazy (*.img *.zip *.xz *.gz *.zst);;Wszystkie (*)",
+        "dlg_choose_image_filter": "Obrazy (*.img *.iso *.zip *.xz *.gz *.zst);;Wszystkie (*)",
         "dlg_choose_dir_title": "Wybierz katalog docelowy",
 
         "warn_system_disks": "Ostrzeżenie: nie można sprawdzić dysków systemowych: {error}",

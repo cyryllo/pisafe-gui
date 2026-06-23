@@ -394,7 +394,7 @@ class PiSafeGUI(QMainWindow):
 
         row_fmt = QHBoxLayout()
         self.backup_fmt = QComboBox()
-        self.backup_fmt.addItems([".img", ".zip", ".gz", ".xz", ".zst"])
+        self.backup_fmt.addItems([".img", ".iso", ".zip", ".gz", ".xz", ".zst"])
         row_fmt.addWidget(QLabel(tr("label_compression")))
         row_fmt.addWidget(self.backup_fmt)
         row_fmt.addStretch()
