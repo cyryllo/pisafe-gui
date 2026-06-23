@@ -28,7 +28,13 @@ fi
 
 echo "==> Instalacja zależności systemowych..."
 sudo apt-get update -q
-sudo apt-get install -y python3-pyqt5 pv policykit-1
+sudo apt-get install -y python3-pyqt5 pv
+
+echo "==> Instalacja PolicyKit (pkexec)..."
+if ! sudo apt-get install -y polkitd pkexec; then
+    # starsze systemy (Debian <12 / Ubuntu <23.04) mają to w jednym pakiecie
+    sudo apt-get install -y policykit-1
+fi
 
 echo "==> Sprawdzanie pisafe..."
 if ! command -v pisafe &> /dev/null; then
