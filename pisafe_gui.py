@@ -8,6 +8,7 @@ Wymagane narzędzie: pisafe (zainstalowane w /usr/local/bin/pisafe)
 import sys
 import os
 import pty
+import shutil
 import subprocess
 import json
 from datetime import datetime
@@ -40,6 +41,7 @@ def _read_version():
 
 APP_VERSION = _read_version()
 ICON_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.png")
+PISAFE_BIN = shutil.which("pisafe") or "/usr/local/bin/pisafe"
 
 DARK_STYLE = """
 QMainWindow, QWidget {
@@ -538,7 +540,7 @@ class PiSafeGUI(QMainWindow):
         )
         if ret != QMessageBox.Yes:
             return
-        self._run(["sudo", "pisafe", "restore", img, dev, "-y"])
+        self._run(["pkexec", PISAFE_BIN, "restore", img, dev, "-y"])
 
     def do_backup(self):
         dev = self._dev_from_combo(self.backup_disk_combo)
@@ -559,7 +561,7 @@ class PiSafeGUI(QMainWindow):
         )
         if ret != QMessageBox.Yes:
             return
-        self._run(["sudo", "pisafe", "backup", dev, out_path, "-y"])
+        self._run(["pkexec", PISAFE_BIN, "backup", dev, out_path, "-y"])
 
     def _run(self, cmd):
         if self.worker and self.worker.isRunning():
@@ -609,6 +611,12 @@ def main():
         msg.setIcon(QMessageBox.Warning)
         msg.setWindowTitle(tr("pisafe_missing_title"))
         msg.setText(tr("pisafe_missing_text"))
+        msg.exec_()
+    if not shutil.which("pkexec"):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Warning)
+        msg.setWindowTitle(tr("pkexec_missing_title"))
+        msg.setText(tr("pkexec_missing_text"))
         msg.exec_()
     win = PiSafeGUI()
     win.show()

@@ -71,7 +71,7 @@ Z konsoli
 python3 pisafe_gui.py
 ```
 
-> Operacje flash/backup wymagają uprawnień `sudo`, ponieważ `pisafe` operuje bezpośrednio na urządzeniach blokowych. Aplikacja poprosi o hasło w trakcie wykonywania komendy.
+> Operacje flash/backup wymagają uprawnień administratora, ponieważ `pisafe` operuje bezpośrednio na urządzeniach blokowych. Aplikacja uruchamia je przez `pkexec` (PolicyKit), który pokazuje natywne graficzne okno z prośbą o hasło — bez potrzeby terminala. `pkexec` jest instalowany automatycznie przez `install.sh` (pakiet `policykit-1`).
 
 ---
 

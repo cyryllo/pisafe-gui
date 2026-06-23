@@ -72,7 +72,7 @@ From the terminal:
 python3 pisafe_gui.py
 ```
 
-> Flash/backup operations require `sudo` privileges, since `pisafe` operates directly on block devices. The app will prompt for a password when running the command.
+> Flash/backup operations require administrator privileges, since `pisafe` operates directly on block devices. The app runs them via `pkexec` (PolicyKit), which shows a native graphical password prompt — no terminal needed. `pkexec` is installed automatically by `install.sh` (package `policykit-1`).
 
 ---
 

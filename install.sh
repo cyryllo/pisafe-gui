@@ -28,7 +28,7 @@ fi
 
 echo "==> Instalacja zależności systemowych..."
 sudo apt-get update -q
-sudo apt-get install -y python3-pyqt5 pv
+sudo apt-get install -y python3-pyqt5 pv policykit-1
 
 echo "==> Sprawdzanie pisafe..."
 if ! command -v pisafe &> /dev/null; then

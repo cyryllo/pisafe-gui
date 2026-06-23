@@ -89,6 +89,14 @@ TRANSLATIONS = {
             "bash pisafe install"
         ),
 
+        "pkexec_missing_title": "pkexec not found",
+        "pkexec_missing_text": (
+            "The 'pkexec' tool (PolicyKit) is not installed. It's required to run "
+            "flash/backup operations with administrator rights.\n\n"
+            "Install it with:\n"
+            "sudo apt-get install policykit-1"
+        ),
+
         "language_label": "Language:",
         "restart_required_title": "Restart required",
         "restart_required_text": "The application will now restart to apply the new language.",
@@ -163,6 +171,14 @@ TRANSLATIONS = {
             "Zainstaluj je poleceniem:\n"
             "wget https://raw.githubusercontent.com/RichardMidnight/pi-safe/main/pisafe -O pisafe\n"
             "bash pisafe install"
+        ),
+
+        "pkexec_missing_title": "Brak pkexec",
+        "pkexec_missing_text": (
+            "Narzędzie 'pkexec' (PolicyKit) nie jest zainstalowane. Jest potrzebne do "
+            "wykonywania operacji flash/backup z prawami administratora.\n\n"
+            "Zainstaluj je poleceniem:\n"
+            "sudo apt-get install policykit-1"
         ),
 
         "language_label": "Język:",
