@@ -90,7 +90,6 @@ pisafe-gui/
 ## 🗺️ Planowane funkcje (TODO)
 
 - [ ] Weryfikacja sumy kontrolnej obrazu (MD5/SHA256)
-- [ ] Historia ostatnich operacji
 - [ ] Obsługa wielu dysków jednocześnie
 - [ ] Zarządzanie wersjami obrazów — przeglądanie wskazanego folderu z obrazami i tagowanie/wersjonowanie backupów (np. v1, v2, "stable"), żeby łatwo odróżnić starsze obrazy od najnowszych
 
