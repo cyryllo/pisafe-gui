@@ -40,14 +40,14 @@ else
 fi
 
 mkdir -p "$INSTALL_DIR"
-cp "$SCRIPT_DIR/pisafe_gui.py" "$SCRIPT_DIR/translations.py" "$SCRIPT_DIR/VERSION" "$INSTALL_DIR/"
+cp "$SCRIPT_DIR/pisafe_gui.py" "$SCRIPT_DIR/translations.py" "$SCRIPT_DIR/VERSION" "$SCRIPT_DIR/icon.png" "$INSTALL_DIR/"
 mkdir -p "$HOME/.local/share/applications"
 cat > "$HOME/.local/share/applications/pisafe-gui.desktop" << DESKTOP
 [Desktop Entry]
 Name=PiSafe GUI
 Comment=Graficzny interfejs dla narzędzia pisafe
 Exec=python3 $INSTALL_DIR/pisafe_gui.py
-Icon=media-flash
+Icon=$INSTALL_DIR/icon.png
 Terminal=false
 Type=Application
 Categories=Utility;System;

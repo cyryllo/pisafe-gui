@@ -38,6 +38,7 @@ def _read_version():
 
 
 APP_VERSION = _read_version()
+ICON_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.png")
 
 DARK_STYLE = """
 QMainWindow, QWidget {
@@ -565,6 +566,8 @@ def main():
     app = QApplication(sys.argv)
     app.setStyle("Fusion")
     app.setStyleSheet(DARK_STYLE)
+    if os.path.isfile(ICON_PATH):
+        app.setWindowIcon(QIcon(ICON_PATH))
     if subprocess.run(["which", "pisafe"], capture_output=True).returncode != 0:
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Warning)
