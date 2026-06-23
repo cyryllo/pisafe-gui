@@ -64,7 +64,7 @@ The `install.sh` script:
 
 ## ▶️ Running the app
 
-From the system menu: System > PiSafe GUI
+From the application menu: Accessories/Utilities > PiSafe GUI
 
 From the terminal:
 

@@ -63,7 +63,7 @@ Skrypt `install.sh`:
 
 ## ▶️ Uruchomienie
 
-Z menu systemowego System>PiSafe GUI
+Z menu aplikacji: Akcesoria/Narzędzia > PiSafe GUI
 
 Z konsoli
 

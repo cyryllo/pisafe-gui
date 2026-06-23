@@ -56,10 +56,9 @@ Exec=python3 $INSTALL_DIR/pisafe_gui.py
 Icon=$INSTALL_DIR/icon.png
 Terminal=false
 Type=Application
-Categories=Utility;System;
+Categories=Utility;
 DESKTOP
 
 echo ""
 echo "✅ Gotowe! Zainstalowano PiSafe GUI $NEW_VERSION."
-echo "   Znajdziesz ją w menu aplikacji (System > PiSafe GUI) — sprawdź tam."
-echo "   Można ją też uruchomić z terminala: python3 $INSTALL_DIR/pisafe_gui.py"
+echo "   Znajdziesz ją w menu aplikacji, w kategorii Narzędzia/Akcesoria."
