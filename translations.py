@@ -77,6 +77,7 @@ TRANSLATIONS = {
         "busy_title": "Busy",
         "busy_text": "Another task is running. Wait or stop it first.",
         "task_stopped": "\n⛔ Task stopped by the user.\n",
+        "finalizing_write": "⏳ Data sent, finalizing write to disk (can take a while on slow USB/SD media)...",
 
         "worker_success": "Completed successfully.",
         "worker_error": "Error (code {code}).",
@@ -161,6 +162,7 @@ TRANSLATIONS = {
         "busy_title": "Zajęty",
         "busy_text": "Trwa inne zadanie. Poczekaj lub je zatrzymaj.",
         "task_stopped": "\n⛔ Zadanie przerwane przez użytkownika.\n",
+        "finalizing_write": "⏳ Dane wysłane, finalizowanie zapisu na dysk (na wolnym USB/SD może to potrwać)...",
 
         "worker_success": "Zakończono pomyślnie.",
         "worker_error": "Błąd (kod {code}).",

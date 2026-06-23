@@ -246,6 +246,7 @@ class PiSafeGUI(QMainWindow):
         self.setWindowTitle(tr("window_title"))
         self.setMinimumSize(820, 640)
         self.worker = None
+        self._finalizing = False
         self._build_ui()
         self.refresh_disks()
 
@@ -567,13 +568,15 @@ class PiSafeGUI(QMainWindow):
         if self.worker and self.worker.isRunning():
             QMessageBox.warning(self, tr("busy_title"), tr("busy_text"))
             return
+        self.progress.setRange(0, 100)
         self.progress.setValue(0)
+        self._finalizing = False
         self.btn_stop.setEnabled(True)
         self.btn_flash.setEnabled(False)
         self.btn_backup.setEnabled(False)
         self.worker = WorkerThread(cmd)
         self.worker.output.connect(self.log_line)
-        self.worker.progress.connect(self.progress.setValue)
+        self.worker.progress.connect(self.on_progress)
         self.worker.finished.connect(self.on_finished)
         self.worker.start()
 
@@ -582,10 +585,24 @@ class PiSafeGUI(QMainWindow):
             self.worker.stop()
             self.log_line(tr("task_stopped"))
 
+    def on_progress(self, value):
+        if value >= 100:
+            # pv only measures how fast it can feed dd, not how fast dd
+            # actually flushes to a (often much slower) USB/SD device, so
+            # 100% here doesn't mean the write is actually done yet.
+            if not self._finalizing:
+                self._finalizing = True
+                self.progress.setRange(0, 0)
+                self.log_line(tr("finalizing_write") + "\n", "#f9e2af")
+        else:
+            self.progress.setRange(0, 100)
+            self.progress.setValue(value)
+
     def on_finished(self, ok, msg):
         self.btn_stop.setEnabled(False)
         self.btn_flash.setEnabled(True)
         self.btn_backup.setEnabled(True)
+        self.progress.setRange(0, 100)
         self.progress.setValue(100 if ok else 0)
         self.log_line(f"\n{'✅' if ok else '❌'} {msg}\n", "#a6e3a1" if ok else "#f38ba8")
 
