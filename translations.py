@@ -26,6 +26,8 @@ TRANSLATIONS = {
         "tab_list": "📋  Disk list",
         "grp_logs": "Logs",
         "btn_stop": "■  Stop",
+        "btn_result_ok": "✓  Done",
+        "btn_result_fail": "✗  Failed",
         "btn_clear_logs": "Clear logs",
 
         "grp_flash_image": "Image file (.img / .iso / .zip / .xz / .gz / .zst)",
@@ -111,6 +113,8 @@ TRANSLATIONS = {
         "tab_list": "📋  Lista dysków",
         "grp_logs": "Logi",
         "btn_stop": "■  Zatrzymaj",
+        "btn_result_ok": "✓  Gotowe",
+        "btn_result_fail": "✗  Błąd",
         "btn_clear_logs": "Wyczyść logi",
 
         "grp_flash_image": "Plik obrazu (.img / .iso / .zip / .xz / .gz / .zst)",

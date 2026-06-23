@@ -114,6 +114,16 @@ QPushButton#btn_stop {
     font-weight: bold;
 }
 QPushButton#btn_stop:hover { background-color: #eba0ac; }
+QPushButton#btn_result_ok, QPushButton#btn_result_ok:disabled {
+    background-color: #a6e3a1;
+    color: #1e1e2e;
+    font-weight: bold;
+}
+QPushButton#btn_result_fail, QPushButton#btn_result_fail:disabled {
+    background-color: #f38ba8;
+    color: #1e1e2e;
+    font-weight: bold;
+}
 QComboBox {
     background-color: #313244;
     color: #cdd6f4;
@@ -564,6 +574,10 @@ class PiSafeGUI(QMainWindow):
             return
         self._run(["pkexec", PISAFE_BIN, "backup", dev, out_path, "-y"])
 
+    def _restyle(self, widget):
+        widget.style().unpolish(widget)
+        widget.style().polish(widget)
+
     def _run(self, cmd):
         if self.worker and self.worker.isRunning():
             QMessageBox.warning(self, tr("busy_title"), tr("busy_text"))
@@ -571,6 +585,9 @@ class PiSafeGUI(QMainWindow):
         self.progress.setRange(0, 100)
         self.progress.setValue(0)
         self._finalizing = False
+        self.btn_stop.setObjectName("btn_stop")
+        self.btn_stop.setText(tr("btn_stop"))
+        self._restyle(self.btn_stop)
         self.btn_stop.setEnabled(True)
         self.btn_flash.setEnabled(False)
         self.btn_backup.setEnabled(False)
@@ -604,6 +621,9 @@ class PiSafeGUI(QMainWindow):
         self.btn_backup.setEnabled(True)
         self.progress.setRange(0, 100)
         self.progress.setValue(100 if ok else 0)
+        self.btn_stop.setObjectName("btn_result_ok" if ok else "btn_result_fail")
+        self.btn_stop.setText(tr("btn_result_ok") if ok else tr("btn_result_fail"))
+        self._restyle(self.btn_stop)
         self.log_line(f"\n{'✅' if ok else '❌'} {msg}\n", "#a6e3a1" if ok else "#f38ba8")
 
     def log_line(self, text, color="#a6e3a1"):
