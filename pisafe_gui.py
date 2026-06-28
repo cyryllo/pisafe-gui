@@ -8,7 +8,9 @@ Wymagane narzędzie: pisafe (zainstalowane w /usr/local/bin/pisafe)
 import sys
 import os
 import pty
+import re
 import shutil
+import sqlite3
 import subprocess
 import json
 from datetime import datetime
@@ -17,11 +19,14 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QPushButton, QComboBox, QFileDialog, QTextEdit,
     QTabWidget, QLineEdit, QMessageBox, QProgressBar, QFrame,
-    QGroupBox, QSizePolicy
+    QGroupBox, QSizePolicy, QInputDialog, QDialog, QDialogButtonBox,
+    QListWidget, QListWidgetItem, QTableWidget, QTableWidgetItem,
+    QAbstractItemView, QHeaderView,
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
 from PyQt5.QtGui import QFont, QColor, QPalette, QIcon, QTextCursor
 
+import db
 from translations import (
     LANGUAGES, DEFAULT_LANGUAGE, tr, set_language, get_language,
     get_saved_language, save_language,
@@ -37,6 +42,12 @@ def _read_version():
             return f.read().strip()
     except OSError:
         return "?"
+
+
+def _slugify(text):
+    text = re.sub(r"\s+", "_", text.strip())
+    text = re.sub(r"[^A-Za-z0-9_-]", "", text)
+    return text or "x"
 
 
 APP_VERSION = _read_version()
@@ -58,14 +69,15 @@ QTabWidget::pane {
 QTabBar::tab {
     background: #181825;
     color: #a6adc8;
-    padding: 10px 22px;
+    padding: 10px 26px;
+    min-width: 190px;
     border-radius: 4px;
     margin: 2px;
+    font-weight: bold;
 }
 QTabBar::tab:selected {
     background: #313244;
     color: #cba6f7;
-    font-weight: bold;
 }
 QGroupBox {
     border: 1px solid #313244;
@@ -250,15 +262,42 @@ class WorkerThread(QThread):
             self.proc.terminate()
 
 
+class VersionNameDialog(QDialog):
+    def __init__(self, project_name, suggested_label, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle(tr("version_dialog_title"))
+        lay = QVBoxLayout(self)
+        lay.addWidget(QLabel(tr("version_dialog_project_label", name=project_name)))
+
+        lay.addWidget(QLabel(tr("version_dialog_label_field")))
+        self.label_edit = QLineEdit(suggested_label)
+        lay.addWidget(self.label_edit)
+
+        lay.addWidget(QLabel(tr("version_dialog_notes_field")))
+        self.notes_edit = QLineEdit()
+        lay.addWidget(self.notes_edit)
+
+        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons.accepted.connect(self.accept)
+        buttons.rejected.connect(self.reject)
+        lay.addWidget(buttons)
+
+    def values(self):
+        return self.label_edit.text().strip(), self.notes_edit.text().strip()
+
+
 class PiSafeGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle(tr("window_title"))
-        self.setMinimumSize(820, 640)
+        self.setMinimumSize(1020, 800)
         self.worker = None
         self._finalizing = False
+        self._active_project = None
+        self._pending_db_entry = None
         self._build_ui()
         self.refresh_disks()
+        self.refresh_projects()
 
     def _build_ui(self):
         central = QWidget()
@@ -301,6 +340,7 @@ class PiSafeGUI(QMainWindow):
         tabs.addTab(self._tab_flash(), tr("tab_flash"))
         tabs.addTab(self._tab_backup(), tr("tab_backup"))
         tabs.addTab(self._tab_list(), tr("tab_list"))
+        tabs.addTab(self._tab_versions(), tr("tab_versions"))
         root.addWidget(tabs, 1)
 
         grp_log = QGroupBox(tr("grp_logs"))
@@ -388,6 +428,17 @@ class PiSafeGUI(QMainWindow):
         gl.addLayout(row)
         lay.addWidget(grp)
 
+        grp_proj = QGroupBox(tr("grp_backup_project"))
+        gl_proj = QHBoxLayout(grp_proj)
+        self.project_combo = QComboBox()
+        self.project_combo.setMinimumWidth(260)
+        self.project_combo.currentIndexChanged.connect(self.on_project_combo_changed)
+        gl_proj.addWidget(self.project_combo, 1)
+        btn_new_project = QPushButton(tr("btn_new_project"))
+        btn_new_project.clicked.connect(self.add_project)
+        gl_proj.addWidget(btn_new_project)
+        lay.addWidget(grp_proj)
+
         grp2 = QGroupBox(tr("grp_backup_output"))
         gl2 = QVBoxLayout(grp2)
         row_dir = QHBoxLayout()
@@ -433,6 +484,51 @@ class PiSafeGUI(QMainWindow):
         QTimer.singleShot(500, self.show_disk_list)
         return w
 
+    def _tab_versions(self):
+        w = QWidget()
+        lay = QHBoxLayout(w)
+
+        grp_proj = QGroupBox(tr("grp_projects"))
+        gl_proj = QVBoxLayout(grp_proj)
+        self.projects_list = QListWidget()
+        self.projects_list.currentItemChanged.connect(lambda *_: self.refresh_images_table())
+        gl_proj.addWidget(self.projects_list, 1)
+        proj_btn_row = QHBoxLayout()
+        btn_new = QPushButton(tr("btn_new_project"))
+        btn_new.clicked.connect(self.add_project)
+        btn_del_proj = QPushButton(tr("btn_delete_project"))
+        btn_del_proj.clicked.connect(self.delete_selected_project)
+        proj_btn_row.addWidget(btn_new)
+        proj_btn_row.addWidget(btn_del_proj)
+        gl_proj.addLayout(proj_btn_row)
+        lay.addWidget(grp_proj, 1)
+
+        grp_img = QGroupBox(tr("grp_images"))
+        gl_img = QVBoxLayout(grp_img)
+        self.images_table = QTableWidget(0, 6)
+        self.images_table.setHorizontalHeaderLabels([
+            tr("col_version"), tr("col_file"), tr("col_date"),
+            tr("col_size"), tr("col_source_disk"), tr("col_notes"),
+        ])
+        self.images_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.images_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.images_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        gl_img.addWidget(self.images_table, 1)
+        img_btn_row = QHBoxLayout()
+        btn_refresh_img = QPushButton(tr("btn_refresh_images"))
+        btn_refresh_img.clicked.connect(self.refresh_images_table)
+        btn_open_folder = QPushButton(tr("btn_open_folder"))
+        btn_open_folder.clicked.connect(self.open_project_folder)
+        btn_del_img = QPushButton(tr("btn_delete_entry"))
+        btn_del_img.clicked.connect(self.delete_selected_image)
+        img_btn_row.addWidget(btn_refresh_img)
+        img_btn_row.addWidget(btn_open_folder)
+        img_btn_row.addWidget(btn_del_img)
+        gl_img.addLayout(img_btn_row)
+        lay.addWidget(grp_img, 3)
+
+        return w
+
     def change_language(self, index):
         code = self.lang_combo.itemData(index)
         if code and code != get_language():
@@ -452,6 +548,138 @@ class PiSafeGUI(QMainWindow):
         d = QFileDialog.getExistingDirectory(self, tr("dlg_choose_dir_title"), self.backup_dir.text())
         if d:
             self.backup_dir.setText(d)
+
+    def refresh_projects(self):
+        projects = db.list_projects()
+        self.project_combo.blockSignals(True)
+        self.project_combo.clear()
+        self.project_combo.addItem(tr("project_combo_none"), None)
+        for p in projects:
+            self.project_combo.addItem(p["name"], p["id"])
+        self.project_combo.blockSignals(False)
+
+        current_proj_id = None
+        current_item = self.projects_list.currentItem()
+        if current_item:
+            current_proj_id = current_item.data(Qt.UserRole)
+        self.projects_list.clear()
+        for p in projects:
+            item = QListWidgetItem(p["name"])
+            item.setData(Qt.UserRole, p["id"])
+            self.projects_list.addItem(item)
+            if p["id"] == current_proj_id:
+                self.projects_list.setCurrentItem(item)
+
+    def on_project_combo_changed(self, index):
+        project_id = self.project_combo.itemData(index)
+        if project_id is None:
+            self._active_project = None
+            return
+        project = db.get_project(project_id)
+        suggested = db.next_version_label(project_id)
+        dlg = VersionNameDialog(project["name"], suggested, self)
+        if dlg.exec_() != QDialog.Accepted:
+            self.project_combo.blockSignals(True)
+            self.project_combo.setCurrentIndex(0)
+            self.project_combo.blockSignals(False)
+            self._active_project = None
+            return
+        label, notes = dlg.values()
+        if not label:
+            label = suggested
+        self.backup_dir.setText(project["folder"])
+        self.backup_name.setText(f"{_slugify(project['name'])}_{_slugify(label)}")
+        self._active_project = {
+            "id": project_id, "version_label": label, "notes": notes or None,
+        }
+
+    def add_project(self):
+        name, ok = QInputDialog.getText(self, tr("new_project_title"), tr("new_project_name_label"))
+        if not ok or not name.strip():
+            return
+        folder = QFileDialog.getExistingDirectory(self, tr("new_project_folder_title"), os.path.expanduser("~"))
+        if not folder:
+            return
+        try:
+            db.create_project(name.strip(), folder)
+        except sqlite3.IntegrityError:
+            QMessageBox.warning(self, tr("error_title"), tr("project_name_exists"))
+            return
+        self.refresh_projects()
+
+    def _selected_project_id(self):
+        item = self.projects_list.currentItem()
+        return item.data(Qt.UserRole) if item else None
+
+    def delete_selected_project(self):
+        project_id = self._selected_project_id()
+        if project_id is None:
+            QMessageBox.warning(self, tr("error_title"), tr("no_project_selected"))
+            return
+        project = db.get_project(project_id)
+        ret = QMessageBox.question(
+            self, tr("confirm_delete_project_title"),
+            tr("confirm_delete_project_text", name=project["name"]),
+            QMessageBox.Yes | QMessageBox.No
+        )
+        if ret != QMessageBox.Yes:
+            return
+        db.delete_project(project_id)
+        self.refresh_projects()
+        self.images_table.setRowCount(0)
+
+    def refresh_images_table(self):
+        project_id = self._selected_project_id()
+        self.images_table.setRowCount(0)
+        if project_id is None:
+            return
+        for row, img in enumerate(db.list_images(project_id)):
+            self.images_table.insertRow(row)
+            size = img["size_bytes"]
+            size_str = f"{size / (1024 * 1024):.1f} MB" if size else ""
+            values = [
+                img["version_label"], img["file_path"], img["created_at"],
+                size_str, img["source_disk"] or "", img["notes"] or "",
+            ]
+            for col, val in enumerate(values):
+                item = QTableWidgetItem(val)
+                if col == 0:
+                    item.setData(Qt.UserRole, img["id"])
+                self.images_table.setItem(row, col, item)
+
+    def open_project_folder(self):
+        project_id = self._selected_project_id()
+        if project_id is None:
+            QMessageBox.warning(self, tr("error_title"), tr("no_project_selected"))
+            return
+        project = db.get_project(project_id)
+        if not os.path.isdir(project["folder"]):
+            QMessageBox.warning(self, tr("error_title"), tr("project_folder_missing", folder=project["folder"]))
+            return
+        subprocess.Popen(["xdg-open", project["folder"]])
+
+    def delete_selected_image(self):
+        row = self.images_table.currentRow()
+        if row < 0:
+            QMessageBox.warning(self, tr("error_title"), tr("no_image_selected"))
+            return
+        image_id = self.images_table.item(row, 0).data(Qt.UserRole)
+
+        box = QMessageBox(self)
+        box.setWindowTitle(tr("confirm_delete_image_title"))
+        box.setText(tr("confirm_delete_image_text"))
+        btn_only = box.addButton(tr("btn_delete_entry_only"), QMessageBox.AcceptRole)
+        btn_with_file = box.addButton(tr("btn_delete_entry_and_file"), QMessageBox.DestructiveRole)
+        box.addButton(QMessageBox.Cancel)
+        box.exec_()
+        clicked = box.clickedButton()
+        if clicked == btn_only:
+            db.delete_image(image_id, delete_file=False)
+        elif clicked == btn_with_file:
+            db.delete_image(image_id, delete_file=True)
+        else:
+            return
+        self.refresh_images_table()
 
     def _get_system_disks(self):
         system_devs = set()
@@ -572,6 +800,18 @@ class PiSafeGUI(QMainWindow):
         )
         if ret != QMessageBox.Yes:
             return
+        if self._active_project:
+            self._pending_db_entry = {
+                "project_id": self._active_project["id"],
+                "version_label": self._active_project["version_label"],
+                "file_path": out_path,
+                "source_disk": dev,
+                "notes": self._active_project["notes"],
+            }
+            self._active_project = None
+            self.project_combo.blockSignals(True)
+            self.project_combo.setCurrentIndex(0)
+            self.project_combo.blockSignals(False)
         self._run(["pkexec", PISAFE_BIN, "backup", dev, out_path, "-y"])
 
     def _restyle(self, widget):
@@ -625,6 +865,16 @@ class PiSafeGUI(QMainWindow):
         self.btn_stop.setText(tr("btn_result_ok") if ok else tr("btn_result_fail"))
         self._restyle(self.btn_stop)
         self.log_line(f"\n{'✅' if ok else '❌'} {msg}\n", "#a6e3a1" if ok else "#f38ba8")
+
+        if ok and self._pending_db_entry:
+            entry = self._pending_db_entry
+            try:
+                entry["size_bytes"] = os.path.getsize(entry["file_path"])
+            except OSError:
+                entry["size_bytes"] = None
+            db.add_image(**entry)
+            self.refresh_images_table()
+        self._pending_db_entry = None
 
     def log_line(self, text, color="#a6e3a1"):
         cursor = self.log.textCursor()

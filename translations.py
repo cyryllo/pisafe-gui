@@ -103,6 +103,48 @@ TRANSLATIONS = {
         "language_label": "Language:",
         "restart_required_title": "Restart required",
         "restart_required_text": "The application will now restart to apply the new language.",
+
+        "tab_versions": "🗂️  Versions",
+        "grp_projects": "Projects",
+        "grp_images": "Images",
+        "btn_new_project": "+  New project",
+        "btn_delete_project": "Delete project",
+        "btn_refresh_images": "⟳  Refresh",
+        "btn_open_folder": "📂  Open folder",
+        "btn_delete_entry": "Delete entry",
+        "col_version": "Version",
+        "col_file": "File",
+        "col_date": "Date",
+        "col_size": "Size",
+        "col_source_disk": "Source disk",
+        "col_notes": "Notes",
+
+        "grp_backup_project": "Project (optional)",
+        "project_combo_none": "— no project —",
+
+        "new_project_title": "New project",
+        "new_project_name_label": "Project name:",
+        "new_project_folder_title": "Choose the project's base folder",
+        "project_name_exists": "A project with this name already exists.",
+
+        "version_dialog_title": "New image version",
+        "version_dialog_project_label": "Project: {name}",
+        "version_dialog_label_field": "Version label:",
+        "version_dialog_notes_field": "Notes (optional):",
+
+        "confirm_delete_project_title": "Delete project",
+        "confirm_delete_project_text": (
+            "Delete project '{name}' and all its version entries from the database?\n\n"
+            "Image files on disk will NOT be deleted."
+        ),
+        "confirm_delete_image_title": "Delete entry",
+        "confirm_delete_image_text": "Delete this version entry?",
+        "btn_delete_entry_only": "Delete entry only",
+        "btn_delete_entry_and_file": "Delete entry and file",
+
+        "no_project_selected": "Select a project first.",
+        "no_image_selected": "Select an image entry first.",
+        "project_folder_missing": "This project's folder no longer exists: {folder}",
     },
     "pl": {
         "window_title": "PiSafe GUI",
@@ -190,6 +232,48 @@ TRANSLATIONS = {
         "language_label": "Język:",
         "restart_required_title": "Wymagany restart",
         "restart_required_text": "Aplikacja zostanie ponownie uruchomiona, aby zastosować nowy język.",
+
+        "tab_versions": "🗂️  Wersje",
+        "grp_projects": "Projekty",
+        "grp_images": "Obrazy",
+        "btn_new_project": "+  Nowy projekt",
+        "btn_delete_project": "Usuń projekt",
+        "btn_refresh_images": "⟳  Odśwież",
+        "btn_open_folder": "📂  Otwórz folder",
+        "btn_delete_entry": "Usuń wpis",
+        "col_version": "Wersja",
+        "col_file": "Plik",
+        "col_date": "Data",
+        "col_size": "Rozmiar",
+        "col_source_disk": "Dysk źródłowy",
+        "col_notes": "Notatki",
+
+        "grp_backup_project": "Projekt (opcjonalnie)",
+        "project_combo_none": "— bez projektu —",
+
+        "new_project_title": "Nowy projekt",
+        "new_project_name_label": "Nazwa projektu:",
+        "new_project_folder_title": "Wybierz folder bazowy projektu",
+        "project_name_exists": "Projekt o tej nazwie już istnieje.",
+
+        "version_dialog_title": "Nowa wersja obrazu",
+        "version_dialog_project_label": "Projekt: {name}",
+        "version_dialog_label_field": "Etykieta wersji:",
+        "version_dialog_notes_field": "Notatki (opcjonalnie):",
+
+        "confirm_delete_project_title": "Usuń projekt",
+        "confirm_delete_project_text": (
+            "Usunąć projekt '{name}' i wszystkie jego wpisy wersji z bazy?\n\n"
+            "Pliki obrazów na dysku NIE zostaną usunięte."
+        ),
+        "confirm_delete_image_title": "Usuń wpis",
+        "confirm_delete_image_text": "Usunąć ten wpis wersji?",
+        "btn_delete_entry_only": "Usuń tylko wpis",
+        "btn_delete_entry_and_file": "Usuń wpis i plik",
+
+        "no_project_selected": "Najpierw wybierz projekt.",
+        "no_image_selected": "Najpierw wybierz wpis obrazu.",
+        "project_folder_missing": "Folder tego projektu już nie istnieje: {folder}",
     },
 }
 

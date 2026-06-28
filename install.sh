@@ -46,7 +46,7 @@ else
 fi
 
 mkdir -p "$INSTALL_DIR"
-cp "$SCRIPT_DIR/pisafe_gui.py" "$SCRIPT_DIR/translations.py" "$SCRIPT_DIR/VERSION" "$SCRIPT_DIR/icon.png" "$INSTALL_DIR/"
+cp "$SCRIPT_DIR/pisafe_gui.py" "$SCRIPT_DIR/translations.py" "$SCRIPT_DIR/db.py" "$SCRIPT_DIR/VERSION" "$SCRIPT_DIR/icon.png" "$INSTALL_DIR/"
 mkdir -p "$HOME/.local/share/applications"
 cat > "$HOME/.local/share/applications/pisafe-gui.desktop" << DESKTOP
 [Desktop Entry]

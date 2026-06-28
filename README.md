@@ -19,6 +19,7 @@ A graphical interface (PyQt5) for the [pisafe](https://github.com/RichardMidnigh
 
 - **⚡ Flash image → SD/USB** — pick an image file (`.img`, `.zip`, `.xz`, `.gz`, `.zst`) and a target drive, flash it in one click
 - **💾 Backup SD/USB → image** — create backups of SD cards with your choice of compression format
+- **🗂️ Image version management** — group backups into named projects with their own base folder, tag each one with a free-text version label (v1, v2, "stable", ...), and browse/delete them in a dedicated tab (SQLite-backed)
 - **🛡️ System disk protection** — the app automatically detects and **hides** disks where the system is mounted (`/`, `/boot`, `/home`, etc.), so there's no risk of accidentally overwriting your own system
 - **📋 Disk list** — full overview of connected block devices (`lsblk`)
 - **📜 Real-time logs** — full command output visible inside the app
@@ -81,6 +82,8 @@ python3 pisafe_gui.py
 ```
 pisafe-gui/
 ├── pisafe_gui.py          # Main PyQt5 application
+├── translations.py        # i18n strings and language persistence
+├── db.py                  # SQLite storage for image version management
 ├── requirements.txt       # Python dependencies
 ├── install.sh             # Installation script
 └── README.md
@@ -92,7 +95,6 @@ pisafe-gui/
 
 - [ ] Image checksum verification (MD5/SHA256)
 - [ ] Support for multiple disks at once
-- [ ] Image version management — browse a chosen folder of created images and tag/version each backup (e.g. v1, v2, "stable"), so it's easy to tell older and newest images apart
 
 ---
 

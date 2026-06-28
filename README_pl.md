@@ -19,6 +19,7 @@ Graficzny interfejs (PyQt5) dla narzędzia [pisafe](https://github.com/RichardMi
 
 - **⚡ Flash obrazu → SD/USB** — wybierz plik obrazu (`.img`, `.zip`, `.xz`, `.gz`, `.zst`) i dysk docelowy, jednym kliknięciem
 - **💾 Backup SD/USB → obraz** — twórz kopie zapasowe kart SD z wyborem formatu kompresji
+- **🗂️ Zarządzanie wersjami obrazów** — grupuj backupy w nazwane projekty z własnym folderem bazowym, etykietuj każdy z nich dowolnym tekstem (v1, v2, "stable" itd.) i przeglądaj/usuwaj je w osobnej zakładce (baza SQLite)
 - **🛡️ Ochrona dysków systemowych** — aplikacja automatycznie wykrywa i **ukrywa** dyski, na których zamontowany jest system (`/`, `/boot`, `/home` itd.), więc nie ma ryzyka przypadkowego nadpisania własnego systemu
 - **📋 Lista dysków** — pełny podgląd podłączonych urządzeń blokowych (`lsblk`)
 - **📜 Logi w czasie rzeczywistym** — pełny output komend widoczny w aplikacji
@@ -80,6 +81,8 @@ python3 pisafe_gui.py
 ```
 pisafe-gui/
 ├── pisafe_gui.py          # Główna aplikacja PyQt5
+├── translations.py        # Teksty i18n oraz zapis wybranego języka
+├── db.py                  # Baza SQLite dla zarządzania wersjami obrazów
 ├── requirements.txt       # Zależności Pythona
 ├── install.sh             # Skrypt instalacyjny
 └── README.md
@@ -91,7 +94,6 @@ pisafe-gui/
 
 - [ ] Weryfikacja sumy kontrolnej obrazu (MD5/SHA256)
 - [ ] Obsługa wielu dysków jednocześnie
-- [ ] Zarządzanie wersjami obrazów — przeglądanie wskazanego folderu z obrazami i tagowanie/wersjonowanie backupów (np. v1, v2, "stable"), żeby łatwo odróżnić starsze obrazy od najnowszych
 
 ---
 
