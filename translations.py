@@ -51,7 +51,6 @@ TRANSLATIONS = {
         "btn_refresh_list": "🔄  Refresh disk list",
 
         "grp_disk_tools": "Disk tools",
-        "btn_disk_details": "🔍  Disk details",
         "btn_erase": "⚠  Format disk",
         "label_format": "Format:",
         "erase_warning": "⚠️  Warning: formatting will PERMANENTLY erase all data on the selected disk!",
@@ -60,7 +59,6 @@ TRANSLATIONS = {
             "WARNING! All data on {dev} will be PERMANENTLY erased!\n\n"
             "Disk: {dev}\nFormat: {fmt}\n\nDo you really want to continue?"
         ),
-        "error_erase_not_removable": "Formatting is only allowed on USB/SD disks.",
 
         "dlg_choose_image_title": "Choose image",
         "dlg_choose_image_filter": "Images (*.img *.iso *.zip *.xz *.gz *.zst);;All files (*)",
@@ -221,7 +219,6 @@ TRANSLATIONS = {
         "btn_refresh_list": "🔄  Odśwież listę dysków",
 
         "grp_disk_tools": "Narzędzia dysku",
-        "btn_disk_details": "🔍  Szczegóły dysku",
         "btn_erase": "⚠  Formatuj dysk",
         "label_format": "Format:",
         "erase_warning": "⚠️  Uwaga: formatowanie TRWALE usunie wszystkie dane na wybranym dysku!",
@@ -230,7 +227,6 @@ TRANSLATIONS = {
             "UWAGA! Wszystkie dane na {dev} zostaną TRWALE usunięte!\n\n"
             "Dysk: {dev}\nFormat: {fmt}\n\nCzy na pewno chcesz kontynuować?"
         ),
-        "error_erase_not_removable": "Formatowanie jest dostępne tylko dla dysków USB/SD.",
 
         "dlg_choose_image_title": "Wybierz obraz",
         "dlg_choose_image_filter": "Obrazy (*.img *.iso *.zip *.xz *.gz *.zst);;Wszystkie (*)",
@@ -391,7 +387,6 @@ TRANSLATIONS = {
         "btn_refresh_list": "🔄  Actualizar lista de discos",
 
         "grp_disk_tools": "Herramientas de disco",
-        "btn_disk_details": "🔍  Detalles del disco",
         "btn_erase": "⚠  Formatear disco",
         "label_format": "Formato:",
         "erase_warning": "⚠️  ¡Advertencia! Formatear borrará PERMANENTEMENTE todos los datos del disco seleccionado.",
@@ -400,7 +395,6 @@ TRANSLATIONS = {
             "¡ADVERTENCIA! ¡Todos los datos en {dev} se borrarán PERMANENTEMENTE!\n\n"
             "Disco: {dev}\nFormato: {fmt}\n\n¿Realmente deseas continuar?"
         ),
-        "error_erase_not_removable": "El formateo solo está permitido en discos USB/SD.",
 
         "dlg_choose_image_title": "Elegir imagen",
         "dlg_choose_image_filter": "Imágenes (*.img *.iso *.zip *.xz *.gz *.zst);;Todos los archivos (*)",
