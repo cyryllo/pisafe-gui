@@ -21,7 +21,7 @@ from PyQt5.QtWidgets import (
     QTabWidget, QLineEdit, QMessageBox, QProgressBar, QFrame,
     QGroupBox, QSizePolicy, QInputDialog, QDialog, QDialogButtonBox,
     QListWidget, QListWidgetItem, QTableWidget, QTableWidgetItem,
-    QAbstractItemView, QHeaderView,
+    QAbstractItemView, QHeaderView, QCheckBox, QScrollArea,
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
 from PyQt5.QtGui import QFont, QColor, QPalette, QIcon, QTextCursor
@@ -53,6 +53,16 @@ def _slugify(text):
 APP_VERSION = _read_version()
 ICON_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.png")
 PISAFE_BIN = shutil.which("pisafe") or "/usr/local/bin/pisafe"
+
+VERIFY_SCRIPT = (
+    'set -e\n'
+    'SRC_HASH=$(pv "$1" | sha256sum | cut -d\' \' -f1)\n'
+    'echo "SRC_HASH=$SRC_HASH"\n'
+    'DST_HASH=$(head -c "$3" "$2" | pv -s "$3" | sha256sum | cut -d\' \' -f1)\n'
+    'echo "DST_HASH=$DST_HASH"\n'
+    'if [ "$SRC_HASH" = "$DST_HASH" ]; then echo "VERIFY_RESULT=MATCH"; '
+    'else echo "VERIFY_RESULT=MISMATCH"; fi\n'
+)
 
 DARK_STYLE = """
 QMainWindow, QWidget {
@@ -287,14 +297,23 @@ class VersionNameDialog(QDialog):
 
 
 class PiSafeGUI(QMainWindow):
+    MAX_FLASH_TARGETS = 8
+
     def __init__(self):
         super().__init__()
         self.setWindowTitle(tr("window_title"))
-        self.setMinimumSize(1020, 800)
+        self.setMinimumSize(1020, 980)
         self.worker = None
         self._finalizing = False
         self._active_project = None
         self._pending_db_entry = None
+        self._pending_verify = None
+        self._verifying = False
+        self._checking_image = False
+        self._expected_image_hash = None
+        self._last_output_lines = []
+        self.target_rows = []
+        self.multi_jobs = []
         self._build_ui()
         self.refresh_disks()
         self.refresh_projects()
@@ -382,26 +401,65 @@ class PiSafeGUI(QMainWindow):
         self.flash_img_path.setPlaceholderText(tr("flash_img_placeholder"))
         btn_browse = QPushButton(tr("btn_browse"))
         btn_browse.clicked.connect(self.browse_image)
+        self.btn_check_image = QPushButton(tr("btn_check_image"))
+        self.btn_check_image.clicked.connect(self.check_image)
         row.addWidget(self.flash_img_path, 1)
         row.addWidget(btn_browse)
+        row.addWidget(self.btn_check_image)
         gl.addLayout(row)
         lay.addWidget(grp)
 
         grp2 = QGroupBox(tr("grp_flash_target"))
         gl2 = QVBoxLayout(grp2)
-        row2 = QHBoxLayout()
-        self.flash_disk_combo = QComboBox()
-        self.flash_disk_combo.setMinimumWidth(300)
-        row2.addWidget(QLabel(tr("label_disk")))
-        row2.addWidget(self.flash_disk_combo, 1)
+
+        self.targets_container = QWidget()
+        self.targets_layout = QVBoxLayout(self.targets_container)
+        self.targets_layout.setContentsMargins(0, 0, 0, 0)
+        self.targets_layout.setSpacing(4)
+        targets_scroll = QScrollArea()
+        targets_scroll.setWidgetResizable(True)
+        targets_scroll.setWidget(self.targets_container)
+        targets_scroll.setMaximumHeight(130)
+        targets_scroll.setFrameShape(QFrame.NoFrame)
+        gl2.addWidget(targets_scroll)
+
+        targets_btn_row = QHBoxLayout()
+        self.btn_add_target = QPushButton(tr("btn_add_target"))
+        self.btn_add_target.clicked.connect(self._add_target_row)
         btn_refresh1 = QPushButton(tr("btn_refresh_disks"))
         btn_refresh1.clicked.connect(self.refresh_disks)
-        row2.addWidget(btn_refresh1)
-        gl2.addLayout(row2)
+        targets_btn_row.addWidget(self.btn_add_target)
+        targets_btn_row.addWidget(btn_refresh1)
+        targets_btn_row.addStretch()
+        gl2.addLayout(targets_btn_row)
+
         lbl_warn = QLabel(tr("flash_warning"))
         lbl_warn.setStyleSheet("color: #f38ba8; font-weight: bold;")
         gl2.addWidget(lbl_warn)
+        self.verify_checkbox = QCheckBox(tr("verify_checkbox_label"))
+        gl2.addWidget(self.verify_checkbox)
         lay.addWidget(grp2)
+
+        self._add_target_row()
+
+        self.grp_multi_progress = QGroupBox(tr("grp_multi_progress"))
+        self.grp_multi_progress.setVisible(False)
+        gl3 = QVBoxLayout(self.grp_multi_progress)
+        self.multi_progress_container = QWidget()
+        self.multi_progress_layout = QVBoxLayout(self.multi_progress_container)
+        self.multi_progress_layout.setContentsMargins(0, 0, 0, 0)
+        self.multi_progress_layout.setSpacing(4)
+        multi_scroll = QScrollArea()
+        multi_scroll.setWidgetResizable(True)
+        multi_scroll.setWidget(self.multi_progress_container)
+        multi_scroll.setMaximumHeight(130)
+        multi_scroll.setFrameShape(QFrame.NoFrame)
+        gl3.addWidget(multi_scroll)
+        self.btn_stop_multi = QPushButton(tr("btn_stop_multi"))
+        self.btn_stop_multi.setEnabled(False)
+        self.btn_stop_multi.clicked.connect(self.stop_multi_flash)
+        gl3.addWidget(self.btn_stop_multi, 0, Qt.AlignRight)
+        lay.addWidget(self.grp_multi_progress)
 
         lay.addStretch()
         self.btn_flash = QPushButton(tr("btn_flash"))
@@ -529,6 +587,40 @@ class PiSafeGUI(QMainWindow):
 
         return w
 
+    def _add_target_row(self):
+        if len(self.target_rows) >= self.MAX_FLASH_TARGETS:
+            return
+        row_widget = QWidget()
+        row_lay = QHBoxLayout(row_widget)
+        row_lay.setContentsMargins(0, 0, 0, 0)
+        combo = QComboBox()
+        combo.setMinimumWidth(260)
+        combo.addItems(getattr(self, "_disk_cache", []))
+        btn_remove = QPushButton("-")
+        btn_remove.setFixedWidth(30)
+        btn_remove.clicked.connect(lambda: self._remove_target_row(row_widget))
+        row_lay.addWidget(QLabel(tr("label_disk")))
+        row_lay.addWidget(combo, 1)
+        row_lay.addWidget(btn_remove)
+        self.targets_layout.addWidget(row_widget)
+        self.target_rows.append({"widget": row_widget, "combo": combo, "remove_btn": btn_remove})
+        self._update_target_row_buttons()
+
+    def _remove_target_row(self, row_widget):
+        entry = next((e for e in self.target_rows if e["widget"] is row_widget), None)
+        if not entry or len(self.target_rows) <= 1:
+            return
+        self.target_rows.remove(entry)
+        row_widget.setParent(None)
+        row_widget.deleteLater()
+        self._update_target_row_buttons()
+
+    def _update_target_row_buttons(self):
+        self.btn_add_target.setEnabled(len(self.target_rows) < self.MAX_FLASH_TARGETS)
+        only_one = len(self.target_rows) <= 1
+        for entry in self.target_rows:
+            entry["remove_btn"].setEnabled(not only_one)
+
     def change_language(self, index):
         code = self.lang_combo.itemData(index)
         if code and code != get_language():
@@ -536,16 +628,39 @@ class PiSafeGUI(QMainWindow):
             QMessageBox.information(self, tr("restart_required_title"), tr("restart_required_text"))
             os.execv(sys.executable, [sys.executable] + sys.argv)
 
+    def _sized_dialog(self, dlg):
+        # The native file dialog can come back oddly sized/clipped on some
+        # desktop environments, so we use Qt's own dialog and size it
+        # ourselves, capped to the available screen.
+        dlg.setOption(QFileDialog.DontUseNativeDialog, True)
+        screen = QApplication.primaryScreen().availableGeometry()
+        dlg.resize(min(900, int(screen.width() * 0.8)), min(600, int(screen.height() * 0.8)))
+        return dlg
+
+    def _pick_open_file(self, title, directory, filter_):
+        dlg = self._sized_dialog(QFileDialog(self, title, directory, filter_))
+        dlg.setFileMode(QFileDialog.ExistingFile)
+        if dlg.exec_() == QDialog.Accepted and dlg.selectedFiles():
+            return dlg.selectedFiles()[0]
+        return ""
+
+    def _pick_directory(self, title, directory):
+        dlg = self._sized_dialog(QFileDialog(self, title, directory))
+        dlg.setFileMode(QFileDialog.Directory)
+        dlg.setOption(QFileDialog.ShowDirsOnly, True)
+        if dlg.exec_() == QDialog.Accepted and dlg.selectedFiles():
+            return dlg.selectedFiles()[0]
+        return ""
+
     def browse_image(self):
-        path, _ = QFileDialog.getOpenFileName(
-            self, tr("dlg_choose_image_title"), os.path.expanduser("~"),
-            tr("dlg_choose_image_filter")
+        path = self._pick_open_file(
+            tr("dlg_choose_image_title"), os.path.expanduser("~"), tr("dlg_choose_image_filter")
         )
         if path:
             self.flash_img_path.setText(path)
 
     def browse_out_dir(self):
-        d = QFileDialog.getExistingDirectory(self, tr("dlg_choose_dir_title"), self.backup_dir.text())
+        d = self._pick_directory(tr("dlg_choose_dir_title"), self.backup_dir.text())
         if d:
             self.backup_dir.setText(d)
 
@@ -597,7 +712,7 @@ class PiSafeGUI(QMainWindow):
         name, ok = QInputDialog.getText(self, tr("new_project_title"), tr("new_project_name_label"))
         if not ok or not name.strip():
             return
-        folder = QFileDialog.getExistingDirectory(self, tr("new_project_folder_title"), os.path.expanduser("~"))
+        folder = self._pick_directory(tr("new_project_folder_title"), os.path.expanduser("~"))
         if not folder:
             return
         try:
@@ -742,9 +857,12 @@ class PiSafeGUI(QMainWindow):
 
     def refresh_disks(self):
         disks = self._get_disks()
-        for combo in (self.flash_disk_combo, self.backup_disk_combo):
-            combo.clear()
-            combo.addItems(disks)
+        self._disk_cache = disks
+        for entry in self.target_rows:
+            entry["combo"].clear()
+            entry["combo"].addItems(disks)
+        self.backup_disk_combo.clear()
+        self.backup_disk_combo.addItems(disks)
         self.log_line(tr("disks_refreshed"))
 
     def _dev_from_combo(self, combo):
@@ -763,25 +881,189 @@ class PiSafeGUI(QMainWindow):
         except Exception as e:
             self.list_output.setPlainText(tr("list_error", error=e))
 
-    def do_flash(self):
+    def _find_checksum_file(self, img):
+        basename = os.path.basename(img)
+        for path in (img + ".sha256", img + ".sha256sum", img + ".md5"):
+            if not os.path.isfile(path):
+                continue
+            try:
+                content = open(path, encoding="utf-8", errors="ignore").read()
+            except OSError:
+                continue
+            lines = [l for l in content.splitlines() if basename in l] or content.splitlines()
+            for line in lines:
+                m = re.search(r"\b([0-9a-fA-F]{64}|[0-9a-fA-F]{32})\b", line)
+                if m:
+                    token = m.group(1)
+                    algo = "sha256" if len(token) == 64 else "md5"
+                    return token.lower(), algo
+        return None, None
+
+    def check_image(self):
         img = self.flash_img_path.text().strip()
-        dev = self._dev_from_combo(self.flash_disk_combo)
         if not img or not os.path.isfile(img):
             QMessageBox.warning(self, tr("error_title"), tr("error_invalid_image_path"))
             return
-        if not dev:
+        if self._is_busy():
+            QMessageBox.warning(self, tr("busy_title"), tr("busy_text"))
+            return
+        expected, algo = self._find_checksum_file(img)
+        if not expected:
+            text, ok = QInputDialog.getText(self, tr("checksum_paste_title"), tr("checksum_paste_label"))
+            if not ok or not text.strip():
+                return
+            expected = text.strip().lower()
+            algo = "sha256" if len(expected) == 64 else "md5" if len(expected) == 32 else None
+            if not algo:
+                QMessageBox.warning(self, tr("error_title"), tr("error_invalid_checksum"))
+                return
+        self._expected_image_hash = expected.lower()
+        self._checking_image = True
+        self.log_line(tr("checksum_running", algo=algo.upper()), "#89b4fa")
+        self._run(["bash", "-c", f'pv "$1" | {algo}sum', "bash", img])
+
+    def _is_busy(self):
+        if self.worker and self.worker.isRunning():
+            return True
+        return any(not job["done"] for job in self.multi_jobs)
+
+    def do_flash(self):
+        img = self.flash_img_path.text().strip()
+        if not img or not os.path.isfile(img):
+            QMessageBox.warning(self, tr("error_title"), tr("error_invalid_image_path"))
+            return
+        if self._is_busy():
+            QMessageBox.warning(self, tr("busy_title"), tr("busy_text"))
+            return
+
+        devices, seen, dupes = [], set(), False
+        for entry in self.target_rows:
+            dev = self._dev_from_combo(entry["combo"])
+            if not dev:
+                continue
+            if dev in seen:
+                dupes = True
+                continue
+            devices.append(dev)
+            seen.add(dev)
+        if dupes:
+            QMessageBox.warning(self, tr("error_title"), tr("error_duplicate_targets"))
+            return
+        if not devices:
             QMessageBox.warning(self, tr("error_title"), tr("error_select_target_disk"))
             return
+
+        if len(devices) == 1:
+            confirm_text = tr("confirm_flash_text", dev=devices[0], img=img)
+        else:
+            confirm_text = tr("confirm_flash_text_multi", devices=", ".join(devices), img=img)
         ret = QMessageBox.warning(
-            self, tr("confirm_flash_title"),
-            tr("confirm_flash_text", dev=dev, img=img),
+            self, tr("confirm_flash_title"), confirm_text,
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
         if ret != QMessageBox.Yes:
             return
-        self._run(["pkexec", PISAFE_BIN, "restore", img, dev, "-y"])
+
+        if len(devices) == 1:
+            dev = devices[0]
+            if self.verify_checkbox.isChecked():
+                if os.path.splitext(img)[1].lower() in (".img", ".iso"):
+                    self._pending_verify = {"img": img, "dev": dev, "size": os.path.getsize(img)}
+                else:
+                    self.log_line(tr("verify_unsupported_format"), "#f9e2af")
+            self._run(["pkexec", PISAFE_BIN, "restore", img, dev, "-y"])
+            return
+
+        if self.verify_checkbox.isChecked():
+            self.log_line(tr("verify_unsupported_multi"), "#f9e2af")
+        self._start_multi_flash(img, devices)
+
+    def _clear_multi_progress_rows(self):
+        while self.multi_progress_layout.count():
+            item = self.multi_progress_layout.takeAt(0)
+            widget = item.widget()
+            if widget:
+                widget.setParent(None)
+                widget.deleteLater()
+
+    def _start_multi_flash(self, img, devices):
+        self.btn_flash.setEnabled(False)
+        self.btn_check_image.setEnabled(False)
+        self._clear_multi_progress_rows()
+        self.grp_multi_progress.setVisible(True)
+        self.multi_jobs = []
+        for dev in devices:
+            row_widget = QWidget()
+            row_lay = QHBoxLayout(row_widget)
+            row_lay.setContentsMargins(0, 0, 0, 0)
+            lbl_dev = QLabel(dev)
+            lbl_dev.setMinimumWidth(110)
+            pbar = QProgressBar()
+            pbar.setRange(0, 100)
+            pbar.setValue(0)
+            lbl_status = QLabel("⏳")
+            row_lay.addWidget(lbl_dev)
+            row_lay.addWidget(pbar, 1)
+            row_lay.addWidget(lbl_status)
+            self.multi_progress_layout.addWidget(row_widget)
+
+            worker = WorkerThread(["pkexec", PISAFE_BIN, "restore", img, dev, "-y"])
+            job = {
+                "dev": dev, "worker": worker, "progress": pbar, "status": lbl_status,
+                "finalizing": False, "done": False, "ok": None,
+            }
+            worker.output.connect(lambda text, d=dev: self.log_line(f"[{d}] {text}"))
+            worker.progress.connect(lambda v, j=job: self._on_multi_progress(j, v))
+            worker.finished.connect(lambda ok, msg, j=job: self._on_multi_finished(j, ok, msg))
+            self.multi_jobs.append(job)
+
+        self.btn_stop_multi.setEnabled(True)
+        self.log_line(
+            tr("multi_flash_started", n=len(devices), devices=", ".join(devices)) + "\n", "#89b4fa"
+        )
+        for job in self.multi_jobs:
+            job["worker"].start()
+
+    def _on_multi_progress(self, job, value):
+        if value >= 100:
+            if not job["finalizing"]:
+                job["finalizing"] = True
+                job["progress"].setRange(0, 0)
+        else:
+            job["progress"].setRange(0, 100)
+            job["progress"].setValue(value)
+
+    def _on_multi_finished(self, job, ok, msg):
+        job["done"] = True
+        job["ok"] = ok
+        job["progress"].setRange(0, 100)
+        job["progress"].setValue(100 if ok else 0)
+        job["status"].setText("✅" if ok else "❌")
+        self.log_line(f"[{job['dev']}] {'✅' if ok else '❌'} {msg}\n", "#a6e3a1" if ok else "#f38ba8")
+        if all(j["done"] for j in self.multi_jobs):
+            self._finish_multi_flash()
+
+    def _finish_multi_flash(self):
+        ok_count = sum(1 for j in self.multi_jobs if j["ok"])
+        fail_count = len(self.multi_jobs) - ok_count
+        self.log_line(
+            tr("multi_flash_summary", ok=ok_count, fail=fail_count) + "\n",
+            "#a6e3a1" if fail_count == 0 else "#f38ba8",
+        )
+        self.btn_flash.setEnabled(True)
+        self.btn_check_image.setEnabled(True)
+        self.btn_stop_multi.setEnabled(False)
+
+    def stop_multi_flash(self):
+        for job in self.multi_jobs:
+            if not job["done"]:
+                job["worker"].stop()
+        self.log_line(tr("task_stopped"))
 
     def do_backup(self):
+        if self._is_busy():
+            QMessageBox.warning(self, tr("busy_title"), tr("busy_text"))
+            return
         dev = self._dev_from_combo(self.backup_disk_combo)
         out_dir = self.backup_dir.text().strip()
         name = self.backup_name.text().strip()
@@ -819,7 +1101,7 @@ class PiSafeGUI(QMainWindow):
         widget.style().polish(widget)
 
     def _run(self, cmd):
-        if self.worker and self.worker.isRunning():
+        if self._is_busy():
             QMessageBox.warning(self, tr("busy_title"), tr("busy_text"))
             return
         self.progress.setRange(0, 100)
@@ -831,8 +1113,11 @@ class PiSafeGUI(QMainWindow):
         self.btn_stop.setEnabled(True)
         self.btn_flash.setEnabled(False)
         self.btn_backup.setEnabled(False)
+        self.btn_check_image.setEnabled(False)
+        self._last_output_lines = []
         self.worker = WorkerThread(cmd)
         self.worker.output.connect(self.log_line)
+        self.worker.output.connect(self._last_output_lines.append)
         self.worker.progress.connect(self.on_progress)
         self.worker.finished.connect(self.on_finished)
         self.worker.start()
@@ -850,21 +1135,53 @@ class PiSafeGUI(QMainWindow):
             if not self._finalizing:
                 self._finalizing = True
                 self.progress.setRange(0, 0)
-                self.log_line(tr("finalizing_write") + "\n", "#f9e2af")
+                if self._checking_image or self._verifying:
+                    self.log_line(tr("finalizing_checksum") + "\n", "#f9e2af")
+                else:
+                    self.log_line(tr("finalizing_write") + "\n", "#f9e2af")
         else:
             self.progress.setRange(0, 100)
             self.progress.setValue(value)
 
     def on_finished(self, ok, msg):
-        self.btn_stop.setEnabled(False)
-        self.btn_flash.setEnabled(True)
-        self.btn_backup.setEnabled(True)
-        self.progress.setRange(0, 100)
-        self.progress.setValue(100 if ok else 0)
-        self.btn_stop.setObjectName("btn_result_ok" if ok else "btn_result_fail")
-        self.btn_stop.setText(tr("btn_result_ok") if ok else tr("btn_result_fail"))
-        self._restyle(self.btn_stop)
-        self.log_line(f"\n{'✅' if ok else '❌'} {msg}\n", "#a6e3a1" if ok else "#f38ba8")
+        if self._checking_image:
+            self._checking_image = False
+            combined = "".join(self._last_output_lines)
+            m = re.search(r"\b([0-9a-fA-F]{64}|[0-9a-fA-F]{32})\b", combined)
+            expected = self._expected_image_hash
+            self._expected_image_hash = None
+            if not ok or not m:
+                self._finish_ui(False, tr("checksum_error_full"))
+            elif m.group(1).lower() == expected:
+                self._finish_ui(True, tr("checksum_match_full"))
+            else:
+                self._finish_ui(False, tr("checksum_mismatch_full"))
+            return
+
+        if self._verifying:
+            self._verifying = False
+            combined = "".join(self._last_output_lines)
+            verify_match = re.search(r"VERIFY_RESULT=(MATCH|MISMATCH)", combined)
+            if not ok or not verify_match:
+                self._finish_ui(False, tr("verify_error_full"))
+            elif verify_match.group(1) == "MATCH":
+                self._finish_ui(True, tr("verify_match_full"))
+            else:
+                self._finish_ui(False, tr("verify_mismatch_full"))
+            return
+
+        if ok and self._pending_verify:
+            info = self._pending_verify
+            self._pending_verify = None
+            self._verifying = True
+            self.log_line(tr("verify_running"), "#89b4fa")
+            cmd = ["pkexec", "/bin/bash", "-c", VERIFY_SCRIPT, "bash",
+                   info["img"], info["dev"], str(info["size"])]
+            self._run(cmd)
+            return
+
+        self._pending_verify = None
+        self._finish_ui(ok, msg)
 
         if ok and self._pending_db_entry:
             entry = self._pending_db_entry
@@ -875,6 +1192,18 @@ class PiSafeGUI(QMainWindow):
             db.add_image(**entry)
             self.refresh_images_table()
         self._pending_db_entry = None
+
+    def _finish_ui(self, ok, msg):
+        self.btn_stop.setEnabled(False)
+        self.btn_flash.setEnabled(True)
+        self.btn_backup.setEnabled(True)
+        self.btn_check_image.setEnabled(True)
+        self.progress.setRange(0, 100)
+        self.progress.setValue(100 if ok else 0)
+        self.btn_stop.setObjectName("btn_result_ok" if ok else "btn_result_fail")
+        self.btn_stop.setText(tr("btn_result_ok") if ok else tr("btn_result_fail"))
+        self._restyle(self.btn_stop)
+        self.log_line(f"\n{'✅' if ok else '❌'} {msg}\n", "#a6e3a1" if ok else "#f38ba8")
 
     def log_line(self, text, color="#a6e3a1"):
         cursor = self.log.textCursor()

@@ -20,6 +20,9 @@ A graphical interface (PyQt5) for the [pisafe](https://github.com/RichardMidnigh
 - **⚡ Flash image → SD/USB** — pick an image file (`.img`, `.zip`, `.xz`, `.gz`, `.zst`) and a target drive, flash it in one click
 - **💾 Backup SD/USB → image** — create backups of SD cards with your choice of compression format
 - **🗂️ Image version management** — group backups into named projects with their own base folder, tag each one with a free-text version label (v1, v2, "stable", ...), and browse/delete them in a dedicated tab (SQLite-backed)
+- **✅ Checksum verification** — optionally verify a flash by comparing the SHA256 of the source `.img`/`.iso` against what was actually written to the disk, reported automatically as a match/mismatch
+- **🔎 Downloaded image check** — check a downloaded image's integrity before flashing it: auto-detects a `.sha256`/`.sha256sum`/`.md5` file next to it, or lets you paste the expected checksum from the download page
+- **📀 Flash to multiple disks at once** — add up to 8 target disks with `+`/`-` and flash the same image to all of them in parallel, with a per-disk progress row and a final success/failure summary
 - **🛡️ System disk protection** — the app automatically detects and **hides** disks where the system is mounted (`/`, `/boot`, `/home`, etc.), so there's no risk of accidentally overwriting your own system
 - **📋 Disk list** — full overview of connected block devices (`lsblk`)
 - **📜 Real-time logs** — full command output visible inside the app
@@ -94,8 +97,7 @@ pisafe-gui/
 
 ## 🗺️ Planned features (TODO)
 
-- [ ] Image checksum verification (MD5/SHA256)
-- [ ] Support for multiple disks at once
+_(none currently planned — see [Contributing](#-contributing) to suggest one)_
 
 ---
 

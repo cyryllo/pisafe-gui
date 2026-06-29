@@ -34,6 +34,7 @@ TRANSLATIONS = {
         "grp_flash_image": "Image file (.img / .iso / .zip / .xz / .gz / .zst)",
         "flash_img_placeholder": "Select or type the path to the image file…",
         "btn_browse": "📂  Browse",
+        "btn_check_image": "🔎  Check image",
         "grp_flash_target": "Target disk (SD / USB)",
         "label_disk": "Disk:",
         "flash_warning": "⚠️  Warning: the selected disk's contents will be PERMANENTLY overwritten!",
@@ -66,11 +67,16 @@ TRANSLATIONS = {
         "error_select_target_disk": "Select a target disk.",
         "error_select_source_disk": "Select a source disk.",
         "error_filename_required": "Provide an output file name.",
+        "error_duplicate_targets": "The same disk is selected more than once. Pick a different disk for each row.",
 
         "confirm_flash_title": "Confirm operation",
         "confirm_flash_text": (
             "WARNING! All data on {dev} will be PERMANENTLY erased!\n\n"
             "Image: {img}\nDisk: {dev}\n\nDo you really want to continue?"
+        ),
+        "confirm_flash_text_multi": (
+            "WARNING! All data on these disks will be PERMANENTLY erased!\n\n"
+            "Image: {img}\nDisks: {devices}\n\nDo you really want to continue?"
         ),
         "confirm_backup_title": "Confirm backup",
         "confirm_backup_text": (
@@ -81,6 +87,29 @@ TRANSLATIONS = {
         "busy_text": "Another task is running. Wait or stop it first.",
         "task_stopped": "\n⛔ Task stopped by the user.\n",
         "finalizing_write": "⏳ Data sent, finalizing write to disk (can take a while on slow USB/SD media)...",
+        "finalizing_checksum": "⏳ Data read, finalizing checksum calculation...",
+
+        "verify_checkbox_label": "Verify write after flashing (.img/.iso only)",
+        "verify_unsupported_format": "ℹ️ Verification only supports .img/.iso — skipped for this format.\n",
+        "verify_unsupported_multi": "ℹ️ Verification only works with a single target disk — skipped for this multi-disk flash.\n",
+        "verify_running": "🔍 Verifying write (computing SHA256 checksums, this can take a while)...\n",
+        "verify_match_full": "Image written and verified — checksum matches.",
+        "verify_mismatch_full": "Image written, but verification FAILED — checksum mismatch!",
+        "verify_error_full": "Could not verify the write (error while computing checksums).",
+
+        "btn_add_target": "+  Add disk",
+        "btn_stop_multi": "■  Stop all",
+        "grp_multi_progress": "Flashing progress",
+        "multi_flash_started": "🚀 Started flashing {n} disks in parallel: {devices}",
+        "multi_flash_summary": "Done: {ok} succeeded, {fail} failed.",
+
+        "checksum_paste_title": "Paste checksum",
+        "checksum_paste_label": "No checksum file found next to this image.\nPaste the expected SHA256 or MD5 checksum (e.g. from the download page):",
+        "error_invalid_checksum": "The pasted text isn't a valid SHA256 (64 hex chars) or MD5 (32 hex chars) checksum.",
+        "checksum_running": "🔍 Checking image ({algo} checksum, this can take a while)...\n",
+        "checksum_match_full": "Image is valid — checksum matches.",
+        "checksum_mismatch_full": "Image is CORRUPTED or invalid — checksum does NOT match!",
+        "checksum_error_full": "Could not check the image's checksum (error while computing it).",
 
         "worker_success": "Completed successfully.",
         "worker_error": "Error (code {code}).",
@@ -163,6 +192,7 @@ TRANSLATIONS = {
         "grp_flash_image": "Plik obrazu (.img / .iso / .zip / .xz / .gz / .zst)",
         "flash_img_placeholder": "Wybierz lub wpisz ścieżkę do pliku obrazu…",
         "btn_browse": "📂  Przeglądaj",
+        "btn_check_image": "🔎  Sprawdź obraz",
         "grp_flash_target": "Dysk docelowy (SD / USB)",
         "label_disk": "Dysk:",
         "flash_warning": "⚠️  Uwaga: zawartość wybranego dysku zostanie TRWALE nadpisana!",
@@ -195,11 +225,16 @@ TRANSLATIONS = {
         "error_select_target_disk": "Wybierz dysk docelowy.",
         "error_select_source_disk": "Wybierz dysk źródłowy.",
         "error_filename_required": "Podaj nazwę pliku wyjściowego.",
+        "error_duplicate_targets": "Ten sam dysk wybrano więcej niż raz. Wybierz różne dyski dla każdej pozycji.",
 
         "confirm_flash_title": "Potwierdź operację",
         "confirm_flash_text": (
             "UWAGA! Wszystkie dane na {dev} zostaną TRWALE usunięte!\n\n"
             "Obraz: {img}\nDysk: {dev}\n\nCzy na pewno chcesz kontynuować?"
+        ),
+        "confirm_flash_text_multi": (
+            "UWAGA! Wszystkie dane na tych dyskach zostaną TRWALE usunięte!\n\n"
+            "Obraz: {img}\nDyski: {devices}\n\nCzy na pewno chcesz kontynuować?"
         ),
         "confirm_backup_title": "Potwierdź backup",
         "confirm_backup_text": (
@@ -210,6 +245,29 @@ TRANSLATIONS = {
         "busy_text": "Trwa inne zadanie. Poczekaj lub je zatrzymaj.",
         "task_stopped": "\n⛔ Zadanie przerwane przez użytkownika.\n",
         "finalizing_write": "⏳ Dane wysłane, finalizowanie zapisu na dysk (na wolnym USB/SD może to potrwać)...",
+        "finalizing_checksum": "⏳ Dane odczytane, finalizowanie liczenia sumy kontrolnej...",
+
+        "verify_checkbox_label": "Zweryfikuj zapis po flashowaniu (tylko .img/.iso)",
+        "verify_unsupported_format": "ℹ️ Weryfikacja dostępna tylko dla .img/.iso — pominięto dla tego formatu.\n",
+        "verify_unsupported_multi": "ℹ️ Weryfikacja działa tylko dla jednego dysku docelowego — pominięto dla flashowania wielu dysków.\n",
+        "verify_running": "🔍 Weryfikowanie zapisu (liczenie sum kontrolnych SHA256, to może chwilę potrwać)...\n",
+        "verify_match_full": "Obraz zapisany i zweryfikowany — suma kontrolna się zgadza.",
+        "verify_mismatch_full": "Obraz zapisany, ale weryfikacja NIE powiodła się — suma kontrolna się różni!",
+        "verify_error_full": "Nie udało się zweryfikować zapisu (błąd podczas liczenia sum kontrolnych).",
+
+        "btn_add_target": "+  Dodaj dysk",
+        "btn_stop_multi": "■  Zatrzymaj wszystkie",
+        "grp_multi_progress": "Postęp wgrywania",
+        "multi_flash_started": "🚀 Rozpoczęto flashowanie {n} dysków równolegle: {devices}",
+        "multi_flash_summary": "Zakończono: {ok} udanych, {fail} nieudanych.",
+
+        "checksum_paste_title": "Wklej sumę kontrolną",
+        "checksum_paste_label": "Nie znaleziono pliku z sumą kontrolną w tym folderze.\nWklej oczekiwaną sumę SHA256 lub MD5 (np. ze strony pobierania):",
+        "error_invalid_checksum": "Wklejony tekst nie jest poprawną sumą SHA256 (64 znaki hex) ani MD5 (32 znaki hex).",
+        "checksum_running": "🔍 Sprawdzanie obrazu (suma {algo}, to może chwilę potrwać)...\n",
+        "checksum_match_full": "Obraz jest poprawny — suma kontrolna się zgadza.",
+        "checksum_mismatch_full": "Obraz USZKODZONY lub niepoprawny — suma kontrolna się NIE zgadza!",
+        "checksum_error_full": "Nie udało się sprawdzić sumy kontrolnej obrazu (błąd podczas liczenia).",
 
         "worker_success": "Zakończono pomyślnie.",
         "worker_error": "Błąd (kod {code}).",
@@ -292,6 +350,7 @@ TRANSLATIONS = {
         "grp_flash_image": "Archivo de imagen (.img / .iso / .zip / .xz / .gz / .zst)",
         "flash_img_placeholder": "Selecciona o escribe la ruta del archivo de imagen…",
         "btn_browse": "📂  Examinar",
+        "btn_check_image": "🔎  Comprobar imagen",
         "grp_flash_target": "Disco de destino (SD / USB)",
         "label_disk": "Disco:",
         "flash_warning": "⚠️  Advertencia: ¡el contenido del disco seleccionado se sobrescribirá PERMANENTEMENTE!",
@@ -324,11 +383,16 @@ TRANSLATIONS = {
         "error_select_target_disk": "Selecciona un disco de destino.",
         "error_select_source_disk": "Selecciona un disco de origen.",
         "error_filename_required": "Indica un nombre de archivo de salida.",
+        "error_duplicate_targets": "El mismo disco está seleccionado más de una vez. Elige un disco distinto en cada fila.",
 
         "confirm_flash_title": "Confirmar operación",
         "confirm_flash_text": (
             "¡ADVERTENCIA! ¡Todos los datos en {dev} se borrarán PERMANENTEMENTE!\n\n"
             "Imagen: {img}\nDisco: {dev}\n\n¿Realmente deseas continuar?"
+        ),
+        "confirm_flash_text_multi": (
+            "¡ADVERTENCIA! ¡Todos los datos en estos discos se borrarán PERMANENTEMENTE!\n\n"
+            "Imagen: {img}\nDiscos: {devices}\n\n¿Realmente deseas continuar?"
         ),
         "confirm_backup_title": "Confirmar backup",
         "confirm_backup_text": (
@@ -339,6 +403,29 @@ TRANSLATIONS = {
         "busy_text": "Hay otra tarea en curso. Espera o detenla primero.",
         "task_stopped": "\n⛔ Tarea detenida por el usuario.\n",
         "finalizing_write": "⏳ Datos enviados, finalizando la escritura en el disco (puede tardar en medios USB/SD lentos)...",
+        "finalizing_checksum": "⏳ Datos leídos, finalizando el cálculo de la suma de comprobación...",
+
+        "verify_checkbox_label": "Verificar escritura tras flashear (solo .img/.iso)",
+        "verify_unsupported_format": "ℹ️ La verificación solo admite .img/.iso — omitida para este formato.\n",
+        "verify_unsupported_multi": "ℹ️ La verificación solo funciona con un único disco de destino — omitida para este flasheo múltiple.\n",
+        "verify_running": "🔍 Verificando la escritura (calculando sumas SHA256, puede tardar un poco)...\n",
+        "verify_match_full": "Imagen escrita y verificada — la suma de comprobación coincide.",
+        "verify_mismatch_full": "Imagen escrita, pero la verificación FALLÓ — la suma de comprobación no coincide.",
+        "verify_error_full": "No se pudo verificar la escritura (error al calcular las sumas de comprobación).",
+
+        "btn_add_target": "+  Añadir disco",
+        "btn_stop_multi": "■  Detener todo",
+        "grp_multi_progress": "Progreso de escritura",
+        "multi_flash_started": "🚀 Iniciado el flasheo de {n} discos en paralelo: {devices}",
+        "multi_flash_summary": "Finalizado: {ok} con éxito, {fail} fallidos.",
+
+        "checksum_paste_title": "Pegar suma de comprobación",
+        "checksum_paste_label": "No se encontró un archivo de suma de comprobación junto a esta imagen.\nPega la suma SHA256 o MD5 esperada (por ejemplo, de la página de descarga):",
+        "error_invalid_checksum": "El texto pegado no es una suma SHA256 (64 caracteres hex) ni MD5 (32 caracteres hex) válida.",
+        "checksum_running": "🔍 Comprobando imagen (suma {algo}, puede tardar un poco)...\n",
+        "checksum_match_full": "La imagen es válida — la suma de comprobación coincide.",
+        "checksum_mismatch_full": "Imagen CORRUPTA o inválida — ¡la suma de comprobación NO coincide!",
+        "checksum_error_full": "No se pudo comprobar la suma de la imagen (error al calcularla).",
 
         "worker_success": "Completado correctamente.",
         "worker_error": "Error (código {code}).",
