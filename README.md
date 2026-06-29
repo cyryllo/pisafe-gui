@@ -23,6 +23,7 @@ A graphical interface (PyQt5) for the [pisafe](https://github.com/RichardMidnigh
 - **✅ Checksum verification** — optionally verify a flash by comparing the SHA256 of the source `.img`/`.iso` against what was actually written to the disk, reported automatically as a match/mismatch
 - **🔎 Downloaded image check** — check a downloaded image's integrity before flashing it: auto-detects a `.sha256`/`.sha256sum`/`.md5` file next to it, or lets you paste the expected checksum from the download page
 - **📀 Flash to multiple disks at once** — add up to 8 target disks with `+`/`-` and flash the same image to all of them in parallel, with a per-disk progress row and a final success/failure summary
+- **🔧 Disk tools** — inspect a disk (detected OS, partition layout, free space) or quick-format it (FAT32/exFAT/NTFS/ext4), limited to USB/SD disks just like flashing
 - **🛡️ System disk protection** — the app automatically detects and **hides** disks where the system is mounted (`/`, `/boot`, `/home`, etc.), so there's no risk of accidentally overwriting your own system
 - **📋 Disk list** — full overview of connected block devices (`lsblk`)
 - **📜 Real-time logs** — full command output visible inside the app

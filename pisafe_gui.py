@@ -593,6 +593,39 @@ class PiSafeGUI(QMainWindow):
     def _tab_list(self):
         w = QWidget()
         lay = QVBoxLayout(w)
+
+        grp_tools = QGroupBox(tr("grp_disk_tools"))
+        gl_tools = QVBoxLayout(grp_tools)
+        row_disk = QHBoxLayout()
+        self.tools_disk_combo = QComboBox()
+        self.tools_disk_combo.setMinimumWidth(300)
+        row_disk.addWidget(QLabel(tr("label_disk")))
+        row_disk.addWidget(self.tools_disk_combo, 1)
+        btn_refresh3 = QPushButton(tr("btn_refresh_disks"))
+        btn_refresh3.clicked.connect(self.refresh_disks)
+        row_disk.addWidget(btn_refresh3)
+        gl_tools.addLayout(row_disk)
+
+        self.btn_disk_details = QPushButton(tr("btn_disk_details"))
+        self.btn_disk_details.clicked.connect(self.show_disk_details)
+        gl_tools.addWidget(self.btn_disk_details)
+
+        lbl_erase_warn = QLabel(tr("erase_warning"))
+        lbl_erase_warn.setStyleSheet("color: #f38ba8; font-weight: bold;")
+        gl_tools.addWidget(lbl_erase_warn)
+
+        row_erase = QHBoxLayout()
+        self.erase_fmt_combo = QComboBox()
+        self.erase_fmt_combo.addItems(["fat32", "exfat", "ntfs", "ext4"])
+        row_erase.addWidget(QLabel(tr("label_format")))
+        row_erase.addWidget(self.erase_fmt_combo)
+        self.btn_erase = QPushButton(tr("btn_erase"))
+        self.btn_erase.clicked.connect(self.do_erase)
+        row_erase.addWidget(self.btn_erase)
+        row_erase.addStretch()
+        gl_tools.addLayout(row_erase)
+        lay.addWidget(grp_tools)
+
         self.list_output = QTextEdit()
         self.list_output.setReadOnly(True)
         lay.addWidget(self.list_output)
@@ -934,6 +967,8 @@ class PiSafeGUI(QMainWindow):
             entry["combo"].addItems(disks)
         self.backup_disk_combo.clear()
         self.backup_disk_combo.addItems(disks)
+        self.tools_disk_combo.clear()
+        self.tools_disk_combo.addItems(disks)
         self.log_line(tr("disks_refreshed"))
 
     def _dev_from_combo(self, combo):
@@ -1060,6 +1095,8 @@ class PiSafeGUI(QMainWindow):
     def _start_multi_flash(self, img, devices):
         self.btn_flash.setEnabled(False)
         self.btn_check_image.setEnabled(False)
+        self.btn_disk_details.setEnabled(False)
+        self.btn_erase.setEnabled(False)
         self._clear_multi_progress_rows()
         self.grp_multi_progress.setVisible(True)
         self.multi_jobs = []
@@ -1123,6 +1160,8 @@ class PiSafeGUI(QMainWindow):
         )
         self.btn_flash.setEnabled(True)
         self.btn_check_image.setEnabled(True)
+        self.btn_disk_details.setEnabled(True)
+        self.btn_erase.setEnabled(True)
         self.btn_stop_multi.setEnabled(False)
 
     def stop_multi_flash(self):
@@ -1167,6 +1206,33 @@ class PiSafeGUI(QMainWindow):
             self.project_combo.blockSignals(False)
         self._run(["pkexec", PISAFE_BIN, "backup", dev, out_path, "-y"])
 
+    def show_disk_details(self):
+        dev = self._dev_from_combo(self.tools_disk_combo)
+        if not dev:
+            QMessageBox.warning(self, tr("error_title"), tr("error_select_target_disk"))
+            return
+        if self._is_busy():
+            QMessageBox.warning(self, tr("busy_title"), tr("busy_text"))
+            return
+        self._run(["pkexec", PISAFE_BIN, "details", dev])
+
+    def do_erase(self):
+        dev = self._dev_from_combo(self.tools_disk_combo)
+        fmt = self.erase_fmt_combo.currentText()
+        if not dev:
+            QMessageBox.warning(self, tr("error_title"), tr("error_select_target_disk"))
+            return
+        if self._is_busy():
+            QMessageBox.warning(self, tr("busy_title"), tr("busy_text"))
+            return
+        ret = QMessageBox.warning(
+            self, tr("confirm_erase_title"), tr("confirm_erase_text", dev=dev, fmt=fmt),
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+        )
+        if ret != QMessageBox.Yes:
+            return
+        self._run(["pkexec", PISAFE_BIN, "erase", dev, fmt, "-y"])
+
     def _restyle(self, widget):
         widget.style().unpolish(widget)
         widget.style().polish(widget)
@@ -1185,6 +1251,8 @@ class PiSafeGUI(QMainWindow):
         self.btn_flash.setEnabled(False)
         self.btn_backup.setEnabled(False)
         self.btn_check_image.setEnabled(False)
+        self.btn_disk_details.setEnabled(False)
+        self.btn_erase.setEnabled(False)
         self._last_output_lines = []
         self.worker = WorkerThread(cmd)
         self.worker.output.connect(self.log_line)
@@ -1269,6 +1337,8 @@ class PiSafeGUI(QMainWindow):
         self.btn_flash.setEnabled(True)
         self.btn_backup.setEnabled(True)
         self.btn_check_image.setEnabled(True)
+        self.btn_disk_details.setEnabled(True)
+        self.btn_erase.setEnabled(True)
         self.progress.setRange(0, 100)
         self.progress.setValue(100 if ok else 0)
         self.btn_stop.setObjectName("btn_result_ok" if ok else "btn_result_fail")

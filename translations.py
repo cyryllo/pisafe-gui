@@ -50,6 +50,17 @@ TRANSLATIONS = {
 
         "btn_refresh_list": "🔄  Refresh disk list",
 
+        "grp_disk_tools": "Disk tools",
+        "btn_disk_details": "🔍  Disk details",
+        "btn_erase": "⚠  Format disk",
+        "label_format": "Format:",
+        "erase_warning": "⚠️  Warning: formatting will PERMANENTLY erase all data on the selected disk!",
+        "confirm_erase_title": "Confirm format",
+        "confirm_erase_text": (
+            "WARNING! All data on {dev} will be PERMANENTLY erased!\n\n"
+            "Disk: {dev}\nFormat: {fmt}\n\nDo you really want to continue?"
+        ),
+
         "dlg_choose_image_title": "Choose image",
         "dlg_choose_image_filter": "Images (*.img *.iso *.zip *.xz *.gz *.zst);;All files (*)",
         "dlg_choose_dir_title": "Choose target directory",
@@ -208,6 +219,17 @@ TRANSLATIONS = {
 
         "btn_refresh_list": "🔄  Odśwież listę dysków",
 
+        "grp_disk_tools": "Narzędzia dysku",
+        "btn_disk_details": "🔍  Szczegóły dysku",
+        "btn_erase": "⚠  Formatuj dysk",
+        "label_format": "Format:",
+        "erase_warning": "⚠️  Uwaga: formatowanie TRWALE usunie wszystkie dane na wybranym dysku!",
+        "confirm_erase_title": "Potwierdź formatowanie",
+        "confirm_erase_text": (
+            "UWAGA! Wszystkie dane na {dev} zostaną TRWALE usunięte!\n\n"
+            "Dysk: {dev}\nFormat: {fmt}\n\nCzy na pewno chcesz kontynuować?"
+        ),
+
         "dlg_choose_image_title": "Wybierz obraz",
         "dlg_choose_image_filter": "Obrazy (*.img *.iso *.zip *.xz *.gz *.zst);;Wszystkie (*)",
         "dlg_choose_dir_title": "Wybierz katalog docelowy",
@@ -365,6 +387,17 @@ TRANSLATIONS = {
         "btn_backup": "💾  Crear imagen de disco",
 
         "btn_refresh_list": "🔄  Actualizar lista de discos",
+
+        "grp_disk_tools": "Herramientas de disco",
+        "btn_disk_details": "🔍  Detalles del disco",
+        "btn_erase": "⚠  Formatear disco",
+        "label_format": "Formato:",
+        "erase_warning": "⚠️  ¡Advertencia! Formatear borrará PERMANENTEMENTE todos los datos del disco seleccionado.",
+        "confirm_erase_title": "Confirmar formateo",
+        "confirm_erase_text": (
+            "¡ADVERTENCIA! ¡Todos los datos en {dev} se borrarán PERMANENTEMENTE!\n\n"
+            "Disco: {dev}\nFormato: {fmt}\n\n¿Realmente deseas continuar?"
+        ),
 
         "dlg_choose_image_title": "Elegir imagen",
         "dlg_choose_image_filter": "Imágenes (*.img *.iso *.zip *.xz *.gz *.zst);;Todos los archivos (*)",

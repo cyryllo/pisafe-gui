@@ -23,6 +23,7 @@ Graficzny interfejs (PyQt5) dla narzędzia [pisafe](https://github.com/RichardMi
 - **✅ Weryfikacja sumy kontrolnej** — opcjonalnie zweryfikuj flashowanie porównując SHA256 pliku źródłowego `.img`/`.iso` z tym, co faktycznie zapisano na dysku, z automatycznym wynikiem zgodności/niezgodności
 - **🔎 Sprawdzanie pobranego obrazu** — sprawdź integralność pobranego obrazu przed flashowaniem: aplikacja sama wykryje plik `.sha256`/`.sha256sum`/`.md5` obok obrazu albo pozwoli wkleić oczekiwaną sumę ze strony pobierania
 - **📀 Flashowanie wielu dysków naraz** — dodaj do 8 dysków docelowych przyciskami `+`/`-` i wgraj ten sam obraz na wszystkie równolegle, z osobnym paskiem postępu dla każdego dysku i podsumowaniem na koniec
+- **🔧 Narzędzia dysku** — sprawdź dysk (wykryty system, układ partycji, wolne miejsce) albo szybko go zformatuj (FAT32/exFAT/NTFS/ext4), ograniczone do dysków USB/SD tak jak przy flashowaniu
 - **🛡️ Ochrona dysków systemowych** — aplikacja automatycznie wykrywa i **ukrywa** dyski, na których zamontowany jest system (`/`, `/boot`, `/home` itd.), więc nie ma ryzyka przypadkowego nadpisania własnego systemu
 - **📋 Lista dysków** — pełny podgląd podłączonych urządzeń blokowych (`lsblk`)
 - **📜 Logi w czasie rzeczywistym** — pełny output komend widoczny w aplikacji
