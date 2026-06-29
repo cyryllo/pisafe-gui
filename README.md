@@ -5,7 +5,7 @@ A graphical interface (PyQt5) for the [pisafe](https://github.com/RichardMidnigh
 ![Python](https://img.shields.io/badge/python-3.7+-blue.svg)
 ![PyQt5](https://img.shields.io/badge/PyQt5-5.15+-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Raspberry%20Pi%20OS-lightgrey.svg)
-![License](https://img.shields.io/badge/license-MIT-yellow.svg)
+![License](https://img.shields.io/badge/license-GPLv3-yellow.svg)
 
 ---
 
@@ -97,7 +97,7 @@ pisafe-gui/
 
 ## 🗺️ Planned features (TODO)
 
-_(none currently planned — see [Contributing](#-contributing) to suggest one)_
+- [ ] Debian (`.deb`) package
 
 ---
 
@@ -111,9 +111,9 @@ Pull requests and issues are welcome! If you find a bug or have a feature idea, 
 
 ## 📄 License
 
-This project is available under the [MIT](https://github.com/cyryllo/pisafe-gui/blob/main/LICENSE) license.
+This project is available under the [GNU GPLv3](https://github.com/cyryllo/pisafe-gui/blob/main/LICENSE) license.
 
-Built on top of [pisafe](https://github.com/RichardMidnight/pi-safe) by RichardMidnight.
+Built on top of [pisafe](https://github.com/RichardMidnight/pi-safe) by RichardMidnight (also GPLv3).
 
 ---
 

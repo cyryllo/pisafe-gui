@@ -5,7 +5,7 @@ Graficzny interfejs (PyQt5) dla narzędzia [pisafe](https://github.com/RichardMi
 ![Python](https://img.shields.io/badge/python-3.7+-blue.svg)
 ![PyQt5](https://img.shields.io/badge/PyQt5-5.15+-green.svg)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20Raspberry%20Pi%20OS-lightgrey.svg)
-![License](https://img.shields.io/badge/license-MIT-yellow.svg)
+![License](https://img.shields.io/badge/license-GPLv3-yellow.svg)
 
 ---
 
@@ -96,7 +96,7 @@ pisafe-gui/
 
 ## 🗺️ Planowane funkcje (TODO)
 
-_(obecnie brak zaplanowanych — zobacz [Wsparcie i wkład](#-wsparcie-i-wkład), aby zaproponować nową)_
+- [ ] Pakiet Debiana (`.deb`)
 
 ---
 
@@ -110,9 +110,9 @@ Pull requesty i zgłoszenia (issues) są mile widziane! Jeśli znajdziesz błąd
 
 ## 📄 Licencja
 
-Ten projekt jest dostępny na licencji [MIT](LICENSE).
+Ten projekt jest dostępny na licencji [GNU GPLv3](LICENSE).
 
-Bazuje na narzędziu [pisafe](https://github.com/RichardMidnight/pi-safe) autorstwa RichardMidnight.
+Bazuje na narzędziu [pisafe](https://github.com/RichardMidnight/pi-safe) autorstwa RichardMidnight (również GPLv3).
 
 ---
 
