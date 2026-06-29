@@ -10,6 +10,7 @@ import os
 LANGUAGES = {
     "en": "English",
     "pl": "Polski",
+    "es": "Español",
 }
 
 DEFAULT_LANGUAGE = "en"
@@ -274,6 +275,135 @@ TRANSLATIONS = {
         "no_project_selected": "Najpierw wybierz projekt.",
         "no_image_selected": "Najpierw wybierz wpis obrazu.",
         "project_folder_missing": "Folder tego projektu już nie istnieje: {folder}",
+    },
+    "es": {
+        "window_title": "PiSafe GUI",
+        "subtitle": "Interfaz gráfica para la herramienta pisafe",
+        "btn_refresh_disks": "⟳  Actualizar discos",
+        "tab_flash": "⚡  Grabar imagen → SD",
+        "tab_backup": "💾  Backup SD → imagen",
+        "tab_list": "📋  Lista de discos",
+        "grp_logs": "Registros",
+        "btn_stop": "■  Detener",
+        "btn_result_ok": "✓  Hecho",
+        "btn_result_fail": "✗  Error",
+        "btn_clear_logs": "Borrar registros",
+
+        "grp_flash_image": "Archivo de imagen (.img / .iso / .zip / .xz / .gz / .zst)",
+        "flash_img_placeholder": "Selecciona o escribe la ruta del archivo de imagen…",
+        "btn_browse": "📂  Examinar",
+        "grp_flash_target": "Disco de destino (SD / USB)",
+        "label_disk": "Disco:",
+        "flash_warning": "⚠️  Advertencia: ¡el contenido del disco seleccionado se sobrescribirá PERMANENTEMENTE!",
+        "btn_flash": "⚡  Grabar imagen en el disco",
+
+        "grp_backup_source": "Disco de origen (SD a respaldar)",
+        "grp_backup_output": "Archivo de imagen de salida",
+        "label_dir": "Carpeta:",
+        "btn_dir": "📂  Carpeta",
+        "label_filename": "Nombre de archivo:",
+        "label_compression": "Compresión:",
+        "btn_backup": "💾  Crear imagen de disco",
+
+        "btn_refresh_list": "🔄  Actualizar lista de discos",
+
+        "dlg_choose_image_title": "Elegir imagen",
+        "dlg_choose_image_filter": "Imágenes (*.img *.iso *.zip *.xz *.gz *.zst);;Todos los archivos (*)",
+        "dlg_choose_dir_title": "Elegir carpeta de destino",
+
+        "warn_system_disks": "Advertencia: no se pudieron comprobar los discos del sistema: {error}",
+        "hidden_system_disks": "Discos del sistema ocultos: {disks}",
+        "hidden_non_removable_disks": "Discos no USB/SD ocultos: {disks}",
+        "no_disks_available": "(no hay discos disponibles)",
+        "lsblk_error": "Error de lsblk: {error}",
+        "disks_refreshed": "Lista de discos actualizada.\n",
+        "list_error": "Error: {error}",
+
+        "error_title": "Error",
+        "error_invalid_image_path": "Indica una ruta válida al archivo de imagen.",
+        "error_select_target_disk": "Selecciona un disco de destino.",
+        "error_select_source_disk": "Selecciona un disco de origen.",
+        "error_filename_required": "Indica un nombre de archivo de salida.",
+
+        "confirm_flash_title": "Confirmar operación",
+        "confirm_flash_text": (
+            "¡ADVERTENCIA! ¡Todos los datos en {dev} se borrarán PERMANENTEMENTE!\n\n"
+            "Imagen: {img}\nDisco: {dev}\n\n¿Realmente deseas continuar?"
+        ),
+        "confirm_backup_title": "Confirmar backup",
+        "confirm_backup_text": (
+            "Creando imagen:\n  Disco: {dev}\n  Archivo: {out_path}\n\n¿Continuar?"
+        ),
+
+        "busy_title": "Ocupado",
+        "busy_text": "Hay otra tarea en curso. Espera o detenla primero.",
+        "task_stopped": "\n⛔ Tarea detenida por el usuario.\n",
+        "finalizing_write": "⏳ Datos enviados, finalizando la escritura en el disco (puede tardar en medios USB/SD lentos)...",
+
+        "worker_success": "Completado correctamente.",
+        "worker_error": "Error (código {code}).",
+
+        "pisafe_missing_title": "pisafe no encontrado",
+        "pisafe_missing_text": (
+            "La herramienta 'pisafe' no está instalada.\n\n"
+            "Instálala con:\n"
+            "wget https://raw.githubusercontent.com/RichardMidnight/pi-safe/main/pisafe -O pisafe\n"
+            "bash pisafe install"
+        ),
+
+        "pkexec_missing_title": "pkexec no encontrado",
+        "pkexec_missing_text": (
+            "La herramienta 'pkexec' (PolicyKit) no está instalada. Es necesaria para "
+            "ejecutar operaciones de grabado/backup con permisos de administrador.\n\n"
+            "Instálala con:\n"
+            "sudo apt-get install policykit-1"
+        ),
+
+        "language_label": "Idioma:",
+        "restart_required_title": "Reinicio necesario",
+        "restart_required_text": "La aplicación se reiniciará ahora para aplicar el nuevo idioma.",
+
+        "tab_versions": "🗂️  Versiones",
+        "grp_projects": "Proyectos",
+        "grp_images": "Imágenes",
+        "btn_new_project": "+  Nuevo proyecto",
+        "btn_delete_project": "Eliminar proyecto",
+        "btn_refresh_images": "⟳  Actualizar",
+        "btn_open_folder": "📂  Abrir carpeta",
+        "btn_delete_entry": "Eliminar entrada",
+        "col_version": "Versión",
+        "col_file": "Archivo",
+        "col_date": "Fecha",
+        "col_size": "Tamaño",
+        "col_source_disk": "Disco de origen",
+        "col_notes": "Notas",
+
+        "grp_backup_project": "Proyecto (opcional)",
+        "project_combo_none": "— sin proyecto —",
+
+        "new_project_title": "Nuevo proyecto",
+        "new_project_name_label": "Nombre del proyecto:",
+        "new_project_folder_title": "Elige la carpeta base del proyecto",
+        "project_name_exists": "Ya existe un proyecto con este nombre.",
+
+        "version_dialog_title": "Nueva versión de imagen",
+        "version_dialog_project_label": "Proyecto: {name}",
+        "version_dialog_label_field": "Etiqueta de versión:",
+        "version_dialog_notes_field": "Notas (opcional):",
+
+        "confirm_delete_project_title": "Eliminar proyecto",
+        "confirm_delete_project_text": (
+            "¿Eliminar el proyecto '{name}' y todas sus entradas de versión de la base de datos?\n\n"
+            "Los archivos de imagen en el disco NO se eliminarán."
+        ),
+        "confirm_delete_image_title": "Eliminar entrada",
+        "confirm_delete_image_text": "¿Eliminar esta entrada de versión?",
+        "btn_delete_entry_only": "Eliminar solo la entrada",
+        "btn_delete_entry_and_file": "Eliminar entrada y archivo",
+
+        "no_project_selected": "Selecciona primero un proyecto.",
+        "no_image_selected": "Selecciona primero una entrada de imagen.",
+        "project_folder_missing": "La carpeta de este proyecto ya no existe: {folder}",
     },
 }
 

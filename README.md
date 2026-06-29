@@ -33,6 +33,7 @@ The interface is available in:
 
 - 🇬🇧 English (default)
 - 🇵🇱 Polski
+- 🇪🇸 Español
 
 Switch language from the dropdown in the app's header — the app restarts to apply the change. Translations live in [`translations.py`](translations.py) as plain key → text dictionaries, so adding a new language doesn't require touching any UI code. Want to add yours? See [Contributing](#-contributing) below.
 

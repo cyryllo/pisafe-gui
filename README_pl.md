@@ -33,6 +33,7 @@ Interfejs jest dostępny w wersjach:
 
 - 🇬🇧 angielski (domyślny)
 - 🇵🇱 polski
+- 🇪🇸 hiszpański
 
 Język można zmienić z listy rozwijanej w nagłówku aplikacji — po zmianie aplikacja uruchamia się ponownie, aby zastosować nowy język. Tłumaczenia znajdują się w pliku [`translations.py`](translations.py) jako proste słowniki klucz → tekst, więc dodanie nowego języka nie wymaga zmian w kodzie interfejsu. Chcesz dodać swój język? Zobacz sekcję [Wsparcie i wkład](#-wsparcie-i-wkład) poniżej.
 
