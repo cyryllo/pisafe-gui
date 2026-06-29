@@ -60,6 +60,7 @@ TRANSLATIONS = {
             "WARNING! All data on {dev} will be PERMANENTLY erased!\n\n"
             "Disk: {dev}\nFormat: {fmt}\n\nDo you really want to continue?"
         ),
+        "error_erase_not_removable": "Formatting is only allowed on USB/SD disks.",
 
         "dlg_choose_image_title": "Choose image",
         "dlg_choose_image_filter": "Images (*.img *.iso *.zip *.xz *.gz *.zst);;All files (*)",
@@ -229,6 +230,7 @@ TRANSLATIONS = {
             "UWAGA! Wszystkie dane na {dev} zostaną TRWALE usunięte!\n\n"
             "Dysk: {dev}\nFormat: {fmt}\n\nCzy na pewno chcesz kontynuować?"
         ),
+        "error_erase_not_removable": "Formatowanie jest dostępne tylko dla dysków USB/SD.",
 
         "dlg_choose_image_title": "Wybierz obraz",
         "dlg_choose_image_filter": "Obrazy (*.img *.iso *.zip *.xz *.gz *.zst);;Wszystkie (*)",
@@ -398,6 +400,7 @@ TRANSLATIONS = {
             "¡ADVERTENCIA! ¡Todos los datos en {dev} se borrarán PERMANENTEMENTE!\n\n"
             "Disco: {dev}\nFormato: {fmt}\n\n¿Realmente deseas continuar?"
         ),
+        "error_erase_not_removable": "El formateo solo está permitido en discos USB/SD.",
 
         "dlg_choose_image_title": "Elegir imagen",
         "dlg_choose_image_filter": "Imágenes (*.img *.iso *.zip *.xz *.gz *.zst);;Todos los archivos (*)",

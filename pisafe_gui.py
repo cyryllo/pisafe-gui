@@ -190,6 +190,13 @@ QPushButton#btn_backup {
 }
 QPushButton#btn_backup:hover { background-color: #74c7ec; }
 QPushButton#btn_backup:disabled { background-color: #313244; color: #6c7086; }
+QPushButton#btn_erase {
+    background-color: #f38ba8;
+    color: #1e1e2e;
+    font-weight: bold;
+}
+QPushButton#btn_erase:hover { background-color: #eba0ac; }
+QPushButton#btn_erase:disabled { background-color: #313244; color: #6c7086; }
 QPushButton#btn_stop {
     background-color: #f38ba8;
     color: #1e1e2e;
@@ -599,6 +606,7 @@ class PiSafeGUI(QMainWindow):
         row_disk = QHBoxLayout()
         self.tools_disk_combo = QComboBox()
         self.tools_disk_combo.setMinimumWidth(300)
+        self.tools_disk_combo.currentIndexChanged.connect(self._update_erase_button_state)
         row_disk.addWidget(QLabel(tr("label_disk")))
         row_disk.addWidget(self.tools_disk_combo, 1)
         btn_refresh3 = QPushButton(tr("btn_refresh_disks"))
@@ -620,6 +628,7 @@ class PiSafeGUI(QMainWindow):
         row_erase.addWidget(QLabel(tr("label_format")))
         row_erase.addWidget(self.erase_fmt_combo)
         self.btn_erase = QPushButton(tr("btn_erase"))
+        self.btn_erase.setObjectName("btn_erase")
         self.btn_erase.clicked.connect(self.do_erase)
         row_erase.addWidget(self.btn_erase)
         row_erase.addStretch()
@@ -959,6 +968,36 @@ class PiSafeGUI(QMainWindow):
         except Exception as e:
             return [tr("lsblk_error", error=e)]
 
+    def _get_disk_tools_list(self):
+        # Details are read-only and safe to show for any disk; only the
+        # destructive erase action is restricted to USB/SD disks below.
+        try:
+            system_disks = self._get_system_disks()
+            out = subprocess.check_output(
+                ["lsblk", "-d", "-o", "NAME,SIZE,MODEL,TRAN,TYPE", "--json"], text=True
+            )
+            data = json.loads(out)
+            result = []
+            for dev in data.get("blockdevices", []):
+                name = dev.get("name", "")
+                size = dev.get("size", "")
+                model = dev.get("model") or ""
+                tran = dev.get("tran") or ""
+                typ = dev.get("type") or ""
+                if typ == "rom":
+                    continue
+                erasable = tran.lower() in self.REMOVABLE_TRANSPORTS and name not in system_disks
+                label = f"/dev/{name}  [{size}]  {model.strip()}  {tran.upper()}"
+                result.append((label, erasable))
+            return result if result else [(tr("no_disks_available"), False)]
+        except Exception as e:
+            return [(tr("lsblk_error", error=e), False)]
+
+    def _update_erase_button_state(self):
+        erasable = bool(self.tools_disk_combo.currentData())
+        self.erase_fmt_combo.setEnabled(erasable)
+        self.btn_erase.setEnabled(erasable)
+
     def refresh_disks(self):
         disks = self._get_disks()
         self._disk_cache = disks
@@ -968,7 +1007,9 @@ class PiSafeGUI(QMainWindow):
         self.backup_disk_combo.clear()
         self.backup_disk_combo.addItems(disks)
         self.tools_disk_combo.clear()
-        self.tools_disk_combo.addItems(disks)
+        for label, erasable in self._get_disk_tools_list():
+            self.tools_disk_combo.addItem(label, erasable)
+        self._update_erase_button_state()
         self.log_line(tr("disks_refreshed"))
 
     def _dev_from_combo(self, combo):
@@ -1161,7 +1202,7 @@ class PiSafeGUI(QMainWindow):
         self.btn_flash.setEnabled(True)
         self.btn_check_image.setEnabled(True)
         self.btn_disk_details.setEnabled(True)
-        self.btn_erase.setEnabled(True)
+        self._update_erase_button_state()
         self.btn_stop_multi.setEnabled(False)
 
     def stop_multi_flash(self):
@@ -1221,6 +1262,9 @@ class PiSafeGUI(QMainWindow):
         fmt = self.erase_fmt_combo.currentText()
         if not dev:
             QMessageBox.warning(self, tr("error_title"), tr("error_select_target_disk"))
+            return
+        if not self.tools_disk_combo.currentData():
+            QMessageBox.warning(self, tr("error_title"), tr("error_erase_not_removable"))
             return
         if self._is_busy():
             QMessageBox.warning(self, tr("busy_title"), tr("busy_text"))
@@ -1338,7 +1382,7 @@ class PiSafeGUI(QMainWindow):
         self.btn_backup.setEnabled(True)
         self.btn_check_image.setEnabled(True)
         self.btn_disk_details.setEnabled(True)
-        self.btn_erase.setEnabled(True)
+        self._update_erase_button_state()
         self.progress.setRange(0, 100)
         self.progress.setValue(100 if ok else 0)
         self.btn_stop.setObjectName("btn_result_ok" if ok else "btn_result_fail")
