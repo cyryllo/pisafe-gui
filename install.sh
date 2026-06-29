@@ -28,7 +28,7 @@ fi
 
 echo "==> Instalacja zależności systemowych..."
 sudo apt-get update -q
-sudo apt-get install -y python3-pyqt5 pv
+sudo apt-get install -y python3-pyqt5 pv sqlite3
 
 echo "==> Instalacja PolicyKit (pkexec)..."
 if ! sudo apt-get install -y polkitd pkexec; then
