@@ -21,10 +21,12 @@ from PyQt5.QtWidgets import (
     QTabWidget, QLineEdit, QMessageBox, QProgressBar, QFrame,
     QGroupBox, QSizePolicy, QInputDialog, QDialog, QDialogButtonBox,
     QListWidget, QListWidgetItem, QTableWidget, QTableWidgetItem,
-    QAbstractItemView, QHeaderView, QCheckBox, QScrollArea,
+    QAbstractItemView, QHeaderView, QCheckBox, QScrollArea, QToolButton,
 )
-from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer
-from PyQt5.QtGui import QFont, QColor, QPalette, QIcon, QTextCursor
+from PyQt5.QtCore import Qt, QThread, pyqtSignal, QTimer, QPointF, QRectF
+from PyQt5.QtGui import (
+    QFont, QColor, QPalette, QIcon, QTextCursor, QPainter, QPen, QPixmap,
+)
 
 import db
 from translations import (
@@ -48,6 +50,64 @@ def _slugify(text):
     text = re.sub(r"\s+", "_", text.strip())
     text = re.sub(r"[^A-Za-z0-9_-]", "", text)
     return text or "x"
+
+
+def _draw_arrow_left(p, s):
+    p.drawPolyline(QPointF(s * 0.62, s * 0.2), QPointF(s * 0.3, s * 0.5), QPointF(s * 0.62, s * 0.8))
+
+
+def _draw_arrow_right(p, s):
+    p.drawPolyline(QPointF(s * 0.38, s * 0.2), QPointF(s * 0.7, s * 0.5), QPointF(s * 0.38, s * 0.8))
+
+
+def _draw_arrow_up(p, s):
+    p.drawPolyline(QPointF(s * 0.2, s * 0.62), QPointF(s * 0.5, s * 0.3), QPointF(s * 0.8, s * 0.62))
+
+
+def _draw_new_folder(p, s):
+    p.drawRoundedRect(QRectF(s * 0.15, s * 0.32, s * 0.7, s * 0.5), 2, 2)
+    p.drawLine(QPointF(s * 0.5, s * 0.45), QPointF(s * 0.5, s * 0.72))
+    p.drawLine(QPointF(s * 0.37, s * 0.585), QPointF(s * 0.63, s * 0.585))
+
+
+def _draw_list_view(p, s):
+    for frac in (0.28, 0.5, 0.72):
+        p.drawLine(QPointF(s * 0.18, s * frac), QPointF(s * 0.82, s * frac))
+
+
+def _draw_detail_view(p, s):
+    for frac in (0.28, 0.5, 0.72):
+        p.drawEllipse(QPointF(s * 0.22, s * frac), s * 0.04, s * 0.04)
+        p.drawLine(QPointF(s * 0.36, s * frac), QPointF(s * 0.82, s * frac))
+
+
+_DIALOG_ICON_DRAWERS = {
+    "backButton": _draw_arrow_left,
+    "forwardButton": _draw_arrow_right,
+    "toParentButton": _draw_arrow_up,
+    "newFolderButton": _draw_new_folder,
+    "listModeButton": _draw_list_view,
+    "detailModeButton": _draw_detail_view,
+}
+
+
+def _make_dialog_icon(draw_fn, size=18, color="#cdd6f4"):
+    # Some desktop icon themes render the QFileDialog toolbar icons
+    # (back/forward/up/new folder/view mode) in a dark color that's
+    # invisible against our dark theme, so we draw our own instead.
+    pm = QPixmap(size, size)
+    pm.fill(Qt.transparent)
+    p = QPainter(pm)
+    p.setRenderHint(QPainter.Antialiasing)
+    pen = QPen(QColor(color))
+    pen.setWidthF(1.6)
+    pen.setCapStyle(Qt.RoundCap)
+    pen.setJoinStyle(Qt.RoundJoin)
+    p.setPen(pen)
+    p.setBrush(Qt.NoBrush)
+    draw_fn(p, size)
+    p.end()
+    return QIcon(pm)
 
 
 APP_VERSION = _read_version()
@@ -358,8 +418,8 @@ class PiSafeGUI(QMainWindow):
         tabs = QTabWidget()
         tabs.addTab(self._tab_flash(), tr("tab_flash"))
         tabs.addTab(self._tab_backup(), tr("tab_backup"))
-        tabs.addTab(self._tab_list(), tr("tab_list"))
         tabs.addTab(self._tab_versions(), tr("tab_versions"))
+        tabs.addTab(self._tab_list(), tr("tab_list"))
         root.addWidget(tabs, 1)
 
         grp_log = QGroupBox(tr("grp_logs"))
@@ -630,11 +690,22 @@ class PiSafeGUI(QMainWindow):
 
     def _sized_dialog(self, dlg):
         # The native file dialog can come back oddly sized/clipped on some
-        # desktop environments, so we use Qt's own dialog and size it
-        # ourselves, capped to the available screen.
+        # desktop environments, so we use Qt's own dialog, size it ourselves
+        # with a margin from the screen edges, and center it.
         dlg.setOption(QFileDialog.DontUseNativeDialog, True)
         screen = QApplication.primaryScreen().availableGeometry()
-        dlg.resize(min(900, int(screen.width() * 0.8)), min(600, int(screen.height() * 0.8)))
+        margin = 40
+        w = min(900, screen.width() - 2 * margin)
+        h = min(600, screen.height() - 2 * margin)
+        dlg.resize(w, h)
+        dlg.move(screen.center().x() - w // 2, screen.center().y() - h // 2)
+        if dlg.layout():
+            dlg.layout().setContentsMargins(14, 14, 14, 14)
+            dlg.layout().setSpacing(8)
+        for name, draw_fn in _DIALOG_ICON_DRAWERS.items():
+            btn = dlg.findChild(QToolButton, name)
+            if btn:
+                btn.setIcon(_make_dialog_icon(draw_fn))
         return dlg
 
     def _pick_open_file(self, title, directory, filter_):
