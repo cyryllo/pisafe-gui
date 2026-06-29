@@ -99,6 +99,10 @@ pisafe-gui/
 ## 🗺️ Planned features (TODO)
 
 - [ ] Debian (`.deb`) package
+- [ ] Store a checksum (SHA256) for each backed-up image, and reuse it in "Check image" instead of needing a sidecar file or manual paste
+- [ ] "Flash this version" shortcut button in the Versions tab, pre-filling the Flash tab's image path
+- [ ] Show total disk space used per project (sum of all version sizes)
+- [ ] Retention/cleanup tools for old versions (e.g. keep last N, or older-than-X-days)
 
 ---
 

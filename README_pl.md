@@ -98,6 +98,10 @@ pisafe-gui/
 ## 🗺️ Planowane funkcje (TODO)
 
 - [ ] Pakiet Debiana (`.deb`)
+- [ ] Zapis sumy kontrolnej (SHA256) dla każdego zbackupowanego obrazu i jej wykorzystanie w "Sprawdź obraz" zamiast pliku z sumą lub ręcznego wklejania
+- [ ] Przycisk "Wgraj tę wersję" w zakładce Wersje, wypełniający ścieżkę obrazu w zakładce Flash
+- [ ] Sumaryczny rozmiar dysku zajmowany przez projekt (suma rozmiarów wszystkich wersji)
+- [ ] Porządkowanie/czyszczenie starych wersji (np. zostaw tylko N najnowszych albo starsze niż X dni)
 
 ---
 
