@@ -38,6 +38,9 @@ Interfejs jest dostępny w wersjach:
 - 🇬🇧 angielski (domyślny)
 - 🇵🇱 polski
 - 🇪🇸 hiszpański
+- 🇵🇹 portugalski
+- 🇮🇹 włoski
+- 🇩🇪 niemiecki
 
 Język można zmienić z listy rozwijanej w nagłówku aplikacji — po zmianie aplikacja uruchamia się ponownie, aby zastosować nowy język. Tłumaczenia znajdują się w pliku [`translations.py`](translations.py) jako proste słowniki klucz → tekst, więc dodanie nowego języka nie wymaga zmian w kodzie interfejsu. Chcesz dodać swój język? Zobacz sekcję [Wsparcie i wkład](#-wsparcie-i-wkład) poniżej.
 
@@ -61,9 +64,10 @@ bash install.sh
 ```
 
 Skrypt `install.sh`:
-1. Instaluje `python3-pyqt5` i `pv`
-2. Instaluje narzędzie `pisafe`, jeśli nie jest jeszcze obecne w systemie
-3. Tworzy skrót aplikacji w menu systemowym
+1. Instaluje `python3-pyqt5`, `pv` i `sqlite3`
+2. Instaluje PolicyKit (`pkexec`), potrzebny do uruchamiania flash/backup z prawami administratora
+3. Instaluje narzędzie `pisafe`, jeśli nie jest jeszcze obecne w systemie
+4. Tworzy skrót aplikacji w menu systemowym
 
 ---
 
@@ -77,7 +81,7 @@ Z konsoli
 python3 pisafe_gui.py
 ```
 
-> Operacje flash/backup wymagają uprawnień administratora, ponieważ `pisafe` operuje bezpośrednio na urządzeniach blokowych. Aplikacja uruchamia je przez `pkexec` (PolicyKit), który pokazuje natywne graficzne okno z prośbą o hasło — bez potrzeby terminala. `pkexec` jest instalowany automatycznie przez `install.sh` (pakiet `policykit-1`).
+> Operacje flash/backup wymagają uprawnień administratora, ponieważ `pisafe` operuje bezpośrednio na urządzeniach blokowych. Aplikacja uruchamia je przez `pkexec` (PolicyKit), który pokazuje natywne graficzne okno z prośbą o hasło — bez potrzeby terminala. `pkexec` jest instalowany automatycznie przez `install.sh` (`polkitd` + `pkexec`, a na starszych systemach pakiet `policykit-1`).
 
 ---
 
@@ -85,12 +89,17 @@ python3 pisafe_gui.py
 
 ```
 pisafe-gui/
-├── pisafe_gui.py          # Główna aplikacja PyQt5
-├── translations.py        # Teksty i18n oraz zapis wybranego języka
-├── db.py                  # Baza SQLite dla zarządzania wersjami obrazów
-├── requirements.txt       # Zależności Pythona
-├── install.sh             # Skrypt instalacyjny
-└── README.md
+├── pisafe_gui.py       # Główna aplikacja PyQt5
+├── translations.py     # Teksty i18n oraz zapis wybranego języka
+├── db.py               # Baza SQLite dla zarządzania wersjami obrazów
+├── requirements.txt    # Zależności Pythona
+├── install.sh          # Skrypt instalacyjny
+├── icon.png            # Ikona aplikacji
+├── VERSION             # Numer bieżącej wersji
+├── LICENSE             # Treść licencji GPLv3
+├── doc/                # Zrzuty ekranu i inne materiały
+├── README.md
+└── README_pl.md        # Ten plik (polska wersja README)
 ```
 
 ---
@@ -100,7 +109,6 @@ pisafe-gui/
 - [ ] Pakiet Debiana (`.deb`)
 - [ ] Zapis sumy kontrolnej (SHA256) dla każdego zbackupowanego obrazu i jej wykorzystanie w "Sprawdź obraz" zamiast pliku z sumą lub ręcznego wklejania
 - [ ] Przycisk "Wgraj tę wersję" w zakładce Wersje, wypełniający ścieżkę obrazu w zakładce Flash
-- [ ] Sumaryczny rozmiar dysku zajmowany przez projekt (suma rozmiarów wszystkich wersji)
 - [ ] Porządkowanie/czyszczenie starych wersji (np. zostaw tylko N najnowszych albo starsze niż X dni)
 
 ---

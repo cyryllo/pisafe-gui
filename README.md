@@ -38,6 +38,9 @@ The interface is available in:
 - 🇬🇧 English (default)
 - 🇵🇱 Polski
 - 🇪🇸 Español
+- 🇵🇹 Português
+- 🇮🇹 Italiano
+- 🇩🇪 Deutsch
 
 Switch language from the dropdown in the app's header — the app restarts to apply the change. Translations live in [`translations.py`](translations.py) as plain key → text dictionaries, so adding a new language doesn't require touching any UI code. Want to add yours? See [Contributing](#-contributing) below.
 
@@ -62,9 +65,10 @@ bash install.sh
 
 The `install.sh` script:
 
-1. Installs `python3-pyqt5` and `pv`
-2. Installs the `pisafe` tool if it's not already present on the system
-3. Creates an application shortcut in the system menu
+1. Installs `python3-pyqt5`, `pv` and `sqlite3`
+2. Installs PolicyKit (`pkexec`), needed to run flash/backup with administrator rights
+3. Installs the `pisafe` tool if it's not already present on the system
+4. Creates an application shortcut in the system menu
 
 ---
 
@@ -78,7 +82,7 @@ From the terminal:
 python3 pisafe_gui.py
 ```
 
-> Flash/backup operations require administrator privileges, since `pisafe` operates directly on block devices. The app runs them via `pkexec` (PolicyKit), which shows a native graphical password prompt — no terminal needed. `pkexec` is installed automatically by `install.sh` (package `policykit-1`).
+> Flash/backup operations require administrator privileges, since `pisafe` operates directly on block devices. The app runs them via `pkexec` (PolicyKit), which shows a native graphical password prompt — no terminal needed. `pkexec` is installed automatically by `install.sh` (`polkitd` + `pkexec`, falling back to the `policykit-1` package on older systems).
 
 ---
 
@@ -86,12 +90,17 @@ python3 pisafe_gui.py
 
 ```
 pisafe-gui/
-├── pisafe_gui.py          # Main PyQt5 application
-├── translations.py        # i18n strings and language persistence
-├── db.py                  # SQLite storage for image version management
-├── requirements.txt       # Python dependencies
-├── install.sh             # Installation script
-└── README.md
+├── pisafe_gui.py       # Main PyQt5 application
+├── translations.py     # i18n strings and language persistence
+├── db.py               # SQLite storage for image version management
+├── requirements.txt    # Python dependencies
+├── install.sh          # Installation script
+├── icon.png            # App icon
+├── VERSION             # Current version number
+├── LICENSE             # GPLv3 license text
+├── doc/                # Screenshots and other docs assets
+├── README.md
+└── README_pl.md        # Polish translation of this README
 ```
 
 ---
@@ -101,7 +110,6 @@ pisafe-gui/
 - [ ] Debian (`.deb`) package
 - [ ] Store a checksum (SHA256) for each backed-up image, and reuse it in "Check image" instead of needing a sidecar file or manual paste
 - [ ] "Flash this version" shortcut button in the Versions tab, pre-filling the Flash tab's image path
-- [ ] Show total disk space used per project (sum of all version sizes)
 - [ ] Retention/cleanup tools for old versions (e.g. keep last N, or older-than-X-days)
 
 ---
